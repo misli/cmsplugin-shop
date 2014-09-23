@@ -14,9 +14,9 @@ from .utils import get_model
 
 class CartItemForm(forms.ModelForm):
 
-    def __init__(self, product, **kwargs):
+    def __init__(self, product, *args, **kwargs):
         self.product = product
-        super(CartItemForm, self).__init__(**kwargs)
+        super(CartItemForm, self).__init__(*args, **kwargs)
         if self.product.all_variants:
             self.fields['variant'].widget.choices = tuple(
                 (variant.id, str(variant))
