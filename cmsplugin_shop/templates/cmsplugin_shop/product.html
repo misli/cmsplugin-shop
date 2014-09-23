@@ -1,0 +1,46 @@
+{% extends 'cmsplugin_shop/base.html' %}
+{% load sekizai_tags i18n shop_tags %}
+
+{% block title %}{{ node.get_page_title }}{% endblock %}
+{% block meta_desc %}{{ node.meta_desc }}{% endblock %}
+{% block keywords %}{{ node.tags }}{% endblock %}
+
+{% block content %}
+
+{% if request.user.is_staff %}
+<div class="cms_plugin cms_plugin_shop-product-{{ product.id }}">
+{% endif %}
+
+<h1 class="product_name">
+    {{ node.name }}
+    <small>{{ node.get_price | currency }}</small>
+</h1>
+
+<div class="product_description">
+    {{ node.description | safe }}
+</div>
+
+<form method="post" action="">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="{% trans 'Add to cart' %}" />
+</form>
+
+{% if request.user.is_staff %}
+</div>
+{% addtoblock 'js' %}
+<script>
+(function($) {
+$(document).ready(function () {
+    new CMS.Plugin('cms_plugin_shop-product-{{ product.id }}', {
+        'plugin_name': '{% trans 'Product' %}',
+        'urls': {
+            'edit_plugin': '{{ product.get_edit_url }}',
+        },
+    });
+});
+})(CMS.$);
+</script>
+{% endaddtoblock %}
+{% endif %}
+
+{% endblock %}

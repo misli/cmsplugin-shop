@@ -1,0 +1,12 @@
+{% extends 'cmsplugin_shop/base.html' %}
+{% load cms_tags i18n %}
+
+{% block content %}
+
+<h1 class="category_root">{% page_attribute "title" %}</h1>
+
+{% include 'cmsplugin_shop/list_categories.html' %}
+
+{% include 'cmsplugin_shop/list_products.html' %}
+
+{% endblock %}

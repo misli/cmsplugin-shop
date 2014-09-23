@@ -1,4 +1,4 @@
 cmsplugin-shop
 ==============
 
-Powerfull Django CMS plugin for e-shop
+Extensible Django CMS plugin for E-shop

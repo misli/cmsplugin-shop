@@ -1,0 +1,51 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
+from datetime import date
+from django import forms
+from django.forms.models import inlineformset_factory
+from django.forms.widgets import CheckboxFieldRenderer, RadioFieldRenderer
+from django.utils.safestring import mark_safe
+
+from .utils import get_model
+
+
+
+class CartItemForm(forms.ModelForm):
+
+    def __init__(self, product, **kwargs):
+        self.product = product
+        super(CartItemForm, self).__init__(**kwargs)
+        if self.product.all_variants:
+            self.fields['variant'].widget.choices = tuple(
+                (variant.id, str(variant))
+                for variant in self.product.all_variants
+            )
+        else:
+            del(self.fields['variant'])
+        
+    class Meta:
+        model   = get_model('CartItem')
+        exclude = ['cart', 'product']
+
+
+
+CartForm = inlineformset_factory(
+    parent_model= get_model('Cart'),
+    model       = get_model('CartItem'),
+    fields      = None,
+    exclude     = ['product', 'variant'],
+    extra       = 0,
+)
+
+
+
+class OrderForm(forms.ModelForm):
+
+    class Meta:
+        model   = get_model('Order')
+        exclude = ['state', 'slug']
+
+
+

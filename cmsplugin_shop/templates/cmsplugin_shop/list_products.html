@@ -1,0 +1,16 @@
+{% load i18n %}
+
+{% if products.count %}
+<div class="list_products">
+    <h2>{% trans "Products" %}</h2>
+
+    <ul>
+        {% for product in products %}
+        <li>
+            <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>, {{ product.unit_price }}Kč
+            {{ product.summary | safe }}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}

@@ -1,0 +1,42 @@
+{% extends 'cmsplugin_shop/base.html' %}
+{% load i18n shop_tags %}
+
+{% block title %}{% trans 'Order' %}{% endblock %}
+
+{% block content %}
+
+<h1>{% trans 'Order' %}</h1>
+
+<table class="table">
+    <tr>
+        <th>{% trans 'Product' %}</th>
+        <th>{% trans 'Unit price' %}</th>
+        <th>{% trans 'Quantity' %}</th>
+        <th>{% trans 'Price' %}</th>
+    </tr>
+    {% for item in request.cart.all_items %}
+    <tr>
+        <td>
+            <a href="{{ item.product.get_absolute_url }}">
+                {{ item.product.name }}
+                {% if item.variant %}/ {{ item.variant.name }}{% endif %}
+            </a>
+        </td>
+        <td>{{ item.get_unit_price | currency }}</td>
+        <td>{{ item.quantity }}</td>
+        <td class="currency">{{ item.get_price | currency }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <th colspan="3">{% trans 'Total' %}</th>
+        <th class="currency">{{ request.cart.get_price | currency }}</th>
+    </tr>
+</table>
+
+<form method="POST">{% csrf_token %}
+    {{ form.as_p }}
+
+    <input type="submit" value="{% trans 'Submit order' %}" />
+</form>
+
+{% endblock %}

@@ -1,0 +1,50 @@
+{% load i18n shop_tags %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>{% trans 'Order' %}</title>
+        <style type="text/css">
+            @page {
+                size: A4;
+                margin: 2cm;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>{% trans 'Order' %}</h2>
+        <table class="table" border="1">
+            <tr>
+                <th>{% trans 'Product' %}</th>
+                <th>{% trans 'Unit price' %}</th>
+                <th>{% trans 'Quantity' %}</th>
+                <th>{% trans 'Price' %}</th>
+            </tr>
+            {% for item in object.cart.all_items %}
+            <tr>
+                <td>
+                    <a href="{{ item.product.get_absolute_url }}">
+                        {{ item.product.name }}
+                        {% if item.variant %}/ {{ item.variant.name }}{% endif %}
+                    </a>
+                </td>
+                <td align="right">{{ item.get_unit_price | currency }}</td>
+                <td align="right">{{ item.quantity }}</td>
+                <td align="right">{{ item.get_price | currency }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td>
+                    {{ object.shipping.name }}
+                </td>
+                <td align="right">{{ object.shipping.get_price | currency }}</td>
+                <td align="right"></td>
+                <td align="right">{{ item.get_price | currency }}</td>
+            </tr>
+            <tr>
+                <th colspan="3">{% trans 'Total' %}</th>
+                <th align="right">{{ object.get_price | currency }}</th>
+            </tr>
+        </table>
+    </body>
+</html>
