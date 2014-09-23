@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, generators, nested_scopes, print_function, unicode_literals, with_statement
 
 from cms.toolbar_base import CMSToolbar
 from django.core.urlresolvers import reverse
