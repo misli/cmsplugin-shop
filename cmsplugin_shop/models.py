@@ -210,7 +210,7 @@ class Shipping(PolymorphicModel):
 class OrderState(PolymorphicModel):
     code        = models.SlugField(_('Code'))
     name        = models.CharField(_('Name'), max_length=150)
-    description = HTMLField(_('Address'), blank=True, default='')
+    description = HTMLField(_('Description'), blank=True, default='')
 
     class Meta:
         verbose_name        = _('Order state')
