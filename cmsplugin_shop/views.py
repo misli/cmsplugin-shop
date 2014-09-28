@@ -175,8 +175,8 @@ class OrderFormView(CreateView):
         form.instance.state = state
         form.instance.cart  = self.request.cart
         response = super(OrderFormView, self).form_valid(form)
-        del(self.request._cart)
         del(self.request.session['cart_id'])
+        del(self.request.cart)
         return response
 
     def get_success_url(self):

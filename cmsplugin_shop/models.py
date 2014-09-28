@@ -12,6 +12,7 @@ from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from polymorphic.polymorphic_model import PolymorphicModel
 from polymorphic_tree.models import PolymorphicMPTTModel, PolymorphicTreeForeignKey
@@ -105,13 +106,9 @@ class Product(Node):
     def get_price(self):
         return self.unit_price
 
-    @property
+    @cached_property
     def all_variants(self):
-        try:
-            return self._all_variants
-        except AttributeError:
-            self._all_variants = list(self.variants.all())
-        return self._all_variants
+        return list(self.variants.order_by('name'))
 
 
 
@@ -147,13 +144,9 @@ class Cart(PolymorphicModel):
     def get_absolute_url(self):
         return reverse('Cart:cart')
 
-    @property
+    @cached_property
     def all_items(self):
-        try:
-            return self._all_items
-        except AttributeError:
-            self._all_items = list(self.items.all())
-        return self._all_items
+        return list(self.items.order_by('product__name', 'variant__name'))
 
     def get_price(self):
         return sum(item.get_price() for item in self.all_items)
