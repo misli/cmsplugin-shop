@@ -1,0 +1,35 @@
+{% extends 'cmsplugin_shop/base.html' %}
+{% load sekizai_tags i18n %}
+
+{% block title %}{{ node.get_page_title }}{% endblock %}
+{% block meta_desc %}{{ node.meta_desc }}{% endblock %}
+{% block keywords %}{{ node.tags }}{% endblock %}
+
+{% block content %}
+
+{% if request.user.is_staff %}
+<div class="cms_plugin cms_plugin_shop-node_{{ node.id }}">
+{% endif %}
+
+{% block specific_content %}{% endblock %}
+
+{% if request.user.is_staff %}
+</div>
+
+{% addtoblock 'js' %}
+<script>
+(function($) {
+$(document).ready(function () {
+    new CMS.Plugin('cms_plugin_shop-node_{{ node.id }}', {
+        'plugin_name': '{{ node.name }}',
+        'urls': {
+            'edit_plugin': '{{ node.get_edit_url }}',
+        },
+    });
+});
+})(CMS.$);
+</script>
+{% endaddtoblock %}
+{% endif %}
+
+{% endblock %}

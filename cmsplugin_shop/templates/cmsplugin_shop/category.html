@@ -1,44 +1,18 @@
-{% extends 'cmsplugin_shop/base.html' %}
+{% extends 'cmsplugin_shop/node.html' %}
 {% load sekizai_tags i18n %}
 
-{% block title %}{{ node.get_page_title }}{% endblock %}
-{% block meta_desc %}{{ node.meta_desc }}{% endblock %}
-{% block keywords %}{{ node.tags }}{% endblock %}
-
-{% block content %}
-
-{% if request.user.is_staff %}
-<div class="cms_plugin cms_plugin_shop-category-{{ category.id }}">
-{% endif %}
+{% block specific_content %}
 
 <h1 class="category_name">
-    {{ node.name }}
+    {{ category.name }}
 </h1>
 
 <div class="category_description">
-    {{ node.description | safe }}
+    {{ category.description | safe }}
 </div>
 
 {% include 'cmsplugin_shop/list_categories.html' %}
 
 {% include 'cmsplugin_shop/list_products.html' %}
-
-{% if request.user.is_staff %}
-</div>
-{% addtoblock 'js' %}
-<script>
-(function($) {
-$(document).ready(function () {
-    new CMS.Plugin('cms_plugin_shop-category-{{ category.id }}', {
-        'plugin_name': '{% trans 'Category' %}',
-        'urls': {
-            'edit_plugin': '{{ category.get_edit_url }}',
-        },
-    });
-});
-})(CMS.$);
-</script>
-{% endaddtoblock %}
-{% endif %}
 
 {% endblock %}
