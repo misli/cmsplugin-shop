@@ -24,7 +24,7 @@ class CartItemForm(forms.ModelForm):
             )
         else:
             del(self.fields['variant'])
-        
+
     class Meta:
         model   = get_model('CartItem')
         exclude = ['cart', 'product']

@@ -114,8 +114,6 @@ class ProductView(FormView):
         form.instance.cart      = self.request.cart
         form.instance.product   = self.kwargs['product']
         try:
-            form.instance.save()
-        except:
             item = form.instance.__class__.objects.get(
                 cart    = form.instance.cart,
                 product = form.instance.product,
@@ -123,6 +121,8 @@ class ProductView(FormView):
             )
             item.quantity += form.instance.quantity
             item.save()
+        except form.instance.__class__.DoesNotExist:
+            form.instance.save()
         return super(ProductView, self).form_valid(form)
 
     def get_success_url(self):
