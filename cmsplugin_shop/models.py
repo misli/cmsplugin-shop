@@ -218,7 +218,7 @@ class OrderState(PolymorphicModel):
 class Order(PolymorphicModel):
     slug        = models.SlugField(editable=False)
     state       = models.ForeignKey(OrderState, verbose_name=_('State'))
-    cart        = models.ForeignKey(Cart, verbose_name=_('Cart'), editable=False)
+    cart        = models.OneToOneField(Cart, verbose_name=_('Cart'), editable=False)
     name        = models.CharField(_('Name'), max_length=150)
     email       = models.EmailField(_('E-mail'), max_length=150)
     phone       = models.CharField(_('Phone'), max_length=150, validators=[
