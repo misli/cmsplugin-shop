@@ -92,7 +92,7 @@ class CatalogView(View):
 
         # or product view
         else:
-            kwargs['count_in_cart'] = len([ i for i in request.cart.all_items if i.product == node ])
+            kwargs['count_in_cart'] = sum([ i.quantity for i in request.cart.all_items if i.product == node ])
             kwargs['product'] = node
             return self.product_view(request, **kwargs)
 
