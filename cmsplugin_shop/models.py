@@ -6,7 +6,6 @@ import tagging
 
 from cms.models import CMSPlugin
 from django.conf import settings
-from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator

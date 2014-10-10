@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, generators, nested_scopes, pri
 from datetime import date
 from django import forms
 from django.forms.models import inlineformset_factory
-from django.forms.widgets import CheckboxFieldRenderer, RadioFieldRenderer
 from django.utils.safestring import mark_safe
 
 from .utils import get_model
