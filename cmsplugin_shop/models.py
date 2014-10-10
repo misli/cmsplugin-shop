@@ -131,6 +131,7 @@ class ProductVariant(PolymorphicModel):
     unit_price = PriceField(_('Unit price'))
 
     class Meta:
+        ordering            = ('name',)
         verbose_name        = _('Product variant')
         verbose_name_plural = _('Product variants')
 
