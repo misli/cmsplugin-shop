@@ -22,6 +22,19 @@ from .utils import currency, get_rand_hash, get_html_field
 # allow different implementation of HTMLField
 HTMLField = get_html_field()
 
+DECIMAL_PLACES  = getattr(settings, 'CMSPLUGIN_SHOP_PRICE_DECIMAL_PLACES', 2)
+MAX_DIGITS      = getattr(settings, 'CMSPLUGIN_SHOP_PRICE_MAX_DIGITS', 9)
+
+
+
+class PriceField(models.DecimalField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('decimal_places', DECIMAL_PLACES)
+        kwargs.setdefault('max_digits',     MAX_DIGITS)
+        kwargs.setdefault('blank',          True)
+        kwargs.setdefault('null',           True)
+        super(PriceField, self).__init__(*args, **kwargs)
+
 
 
 @python_2_unicode_compatible
@@ -94,7 +107,7 @@ class Product(Node):
         verbose_name=_('Date added'))
     last_modified = models.DateTimeField(auto_now=True,
         verbose_name=_('Last modified'))
-    unit_price = models.IntegerField(_('Unit price'))
+    unit_price = PriceField(_('Unit price'))
 
     can_have_children = False
 
@@ -115,7 +128,7 @@ class Product(Node):
 class ProductVariant(PolymorphicModel):
     product    = models.ForeignKey(Product, verbose_name=_('Product'), related_name='variants')
     name       = models.CharField(_('Name'), max_length=50)
-    unit_price = models.IntegerField(_('Unit price'), null=True, blank=True)
+    unit_price = PriceField(_('Unit price'))
 
     class Meta:
         verbose_name        = _('Product variant')
@@ -184,7 +197,7 @@ class CartItem(PolymorphicModel):
 class Shipping(PolymorphicModel):
     name        = models.CharField(_('Name'), max_length=150)
     description = HTMLField(_('Address'), blank=True, default='')
-    price       = models.IntegerField(_('Price'))
+    price       = PriceField(_('Price'))
 
     class Meta:
         verbose_name        = _('Shipping')
