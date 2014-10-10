@@ -4,11 +4,14 @@ import cStringIO
 
 from cms.views import details as cms_page
 from django.conf import settings
+from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.forms import ModelForm
-from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404
+from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext_lazy as _
 from django.views.generic import (
     View, TemplateView, FormView, UpdateView, CreateView, DetailView
 )
@@ -123,6 +126,9 @@ class ProductView(FormView):
             item.save()
         except form.instance.__class__.DoesNotExist:
             form.instance.save()
+        messages.add_message(self.request, messages.INFO,
+            mark_safe(_('Product has been added to <a href="{}">shopping cart</a>').format(reverse('Cart:cart')))
+        )
         return super(ProductView, self).form_valid(form)
 
     def get_success_url(self):
