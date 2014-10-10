@@ -289,7 +289,7 @@ class ProductPlugin(CMSPlugin):
     def __str__(self):
         return self.product.name
 
-    @property
+    @cached_property
     def render_template(self):
         return 'cmsplugin_shop/product/%s.html' % self.template
 
@@ -305,7 +305,7 @@ class CategoryPlugin(CMSPlugin):
     def __str__(self):
         return self.category.name
 
-    @property
+    @cached_property
     def render_template(self):
         return 'cmsplugin_shop/category/%s.html' % self.template
 
