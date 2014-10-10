@@ -170,7 +170,7 @@ class CartItem(PolymorphicModel):
     cart        = models.ForeignKey(Cart,           verbose_name=_('Cart'),             related_name='items')
     product     = models.ForeignKey(Product,        verbose_name=_('Product'),          related_name='+')
     variant     = models.ForeignKey(ProductVariant, verbose_name=_('Product variant'),  related_name='+',
-                    blank=True, null=True)
+                    blank=False, null=True)
     quantity    = models.PositiveIntegerField(_('Quantity'), default=1)
 
     class Meta(object):
