@@ -135,7 +135,7 @@ class ProductVariant(PolymorphicModel):
         verbose_name_plural = _('Product variants')
 
     def __str__(self):
-        return self.name
+        return '{} ({})'.format(self.name, currency(self.get_price()))
 
     def get_price(self):
         return self.unit_price or self.product.unit_price
