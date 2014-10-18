@@ -158,7 +158,10 @@ class CartView(UpdateView):
         return self.request.cart
 
     def get_success_url(self):
-        return self.request.cart.get_absolute_url()
+        if 'update-and-order' in self.request.POST:
+            return reverse('Order:form')
+        else:
+            return reverse('Cart:cart')
 
 cart = CartView.as_view()
 

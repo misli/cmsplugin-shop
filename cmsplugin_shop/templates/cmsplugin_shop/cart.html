@@ -37,7 +37,8 @@
         </tr>
     </table>
 
-    <input type="submit" value="{% trans 'Update shopping cart' %}" />
+    <input name="update" type="submit" value="{% trans 'Update shopping cart' %}" />
+    <input name="update-and-order" type="submit" value="{% trans 'Update and continue to order' %}" />
     {{ form.management_form }}
 </form>
 

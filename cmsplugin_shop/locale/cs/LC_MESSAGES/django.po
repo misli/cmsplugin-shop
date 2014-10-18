@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-11 01:22+0200\n"
+"POT-Creation-Date: 2014-10-18 11:39+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Jakub Dorňák <jakub.dornak@misli.cz>\n"
 "Language: Czech\n"
@@ -229,6 +229,10 @@ msgstr "Celkem"
 #: templates/cmsplugin_shop/cart.html:40
 msgid "Update shopping cart"
 msgstr "Aktualizovat nákupní košík"
+
+#: templates/cmsplugin_shop/cart.html:41
+msgid "Update and continue to order"
+msgstr "Aktualizovat a objednat"
 
 #: templates/cmsplugin_shop/order_confirm.html:4
 #: templates/cmsplugin_shop/order_confirm.html:8
