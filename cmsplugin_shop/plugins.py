@@ -11,7 +11,6 @@ class ProductPlugin(CMSPluginBase):
     model = get_model('ProductPlugin')
     name = _('Product')
     text_enabled = True
-    fields = ('product', 'template')
 
     def render(self, context, instance, placeholder):
         context.update({
@@ -30,7 +29,6 @@ class CategoryPlugin(CMSPluginBase):
     model = get_model('CategoryPlugin')
     name = _('Category')
     text_enabled = True
-    fields = ('category', 'template')
 
     def render(self, context, instance, placeholder):
         context.update({

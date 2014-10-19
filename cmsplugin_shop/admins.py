@@ -113,7 +113,7 @@ class OrderStateAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     readonly_fields = ['cart']
     list_filter     = ['state']
-    list_display    = ['name', 'email', 'phone', 'address', 'shipping', 'state', 'cart']
+    list_display    = ['first_name', 'last_name', 'email', 'phone', 'address', 'shipping', 'state', 'cart']
 
 
 

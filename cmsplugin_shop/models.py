@@ -120,18 +120,19 @@ class Product(Node):
 
     @cached_property
     def all_variants(self):
-        return list(self.variants.order_by('name'))
+        return list(self.variants.all())
 
 
 
 @python_2_unicode_compatible
 class ProductVariant(PolymorphicModel):
-    product    = models.ForeignKey(Product, verbose_name=_('Product'), related_name='variants')
-    name       = models.CharField(_('Name'), max_length=50)
-    unit_price = PriceField(_('Unit price'))
+    product     = models.ForeignKey(Product, verbose_name=_('Product'), related_name='variants')
+    name        = models.CharField(_('Name'), max_length=50)
+    unit_price  = PriceField(_('Unit price'))
+    ordering    = models.PositiveIntegerField(_('Ordering'), default=1)
 
     class Meta:
-        ordering            = ('name',)
+        ordering            = ('ordering', 'name')
         verbose_name        = _('Product variant')
         verbose_name_plural = _('Product variants')
 
@@ -192,6 +193,13 @@ class CartItem(PolymorphicModel):
            and (self.variant.get_price() * self.quantity) \
             or (self.product.get_price() * self.quantity)
 
+    def save(self):
+        if self.quantity == 0:
+            if self.id:
+                super(CartItem, self).delete()
+        else:
+            super(CartItem, self).save()
+
 
 
 @python_2_unicode_compatible
@@ -199,8 +207,10 @@ class Shipping(PolymorphicModel):
     name        = models.CharField(_('Name'), max_length=150)
     description = HTMLField(_('Address'), blank=True, default='')
     price       = PriceField(_('Price'))
+    ordering    = models.PositiveIntegerField(_('Ordering'), default=1)
 
     class Meta:
+        ordering            = ('ordering', 'name')
         verbose_name        = _('Shipping')
         verbose_name_plural = _('Shippings')
 
@@ -230,22 +240,27 @@ class OrderState(PolymorphicModel):
 @python_2_unicode_compatible
 class Order(PolymorphicModel):
     slug        = models.SlugField(editable=False)
-    state       = models.ForeignKey(OrderState, verbose_name=_('State'))
+    date        = models.DateTimeField(auto_now_add=True, editable=False)
+    confirmed   = models.BooleanField(_('Confirmed'), default=False, editable=False)
     cart        = models.OneToOneField(Cart, verbose_name=_('Cart'), editable=False)
-    name        = models.CharField(_('Name'), max_length=150)
-    email       = models.EmailField(_('E-mail'), max_length=150)
+    state       = models.ForeignKey(OrderState, verbose_name=_('State'))
+    first_name  = models.CharField(_('First name'), max_length=30)
+    last_name   = models.CharField(_('Last name'), max_length=30)
+    email       = models.EmailField(_('E-mail'))
     phone       = models.CharField(_('Phone'), max_length=150, validators=[
                     RegexValidator(r'^\+?[0-9 ]+$')])
     address     = models.TextField(_('Address'))
+    note        = models.TextField(_('Note'), blank=True)
     shipping    = models.ForeignKey(Shipping, verbose_name=_('Shipping'))
-    date        = models.DateTimeField(auto_now_add=True, editable=False)
+    agreement   = models.BooleanField(_('I agree with terms and conditions'), default=False)
 
     class Meta(object):
-        verbose_name = _('Order')
+        ordering            = ('-date',)
+        verbose_name        = _('Order')
         verbose_name_plural = _('Orders')
 
     def __str__(self):
-        return '{} {}'.format(self.date, self.name)
+        return '{} {} {}'.format(self.date, self.first_name, self.last_name)
 
     def get_absolute_url(self):
         return reverse('Order:pdf', kwargs={'slug':self.slug})
