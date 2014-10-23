@@ -6,15 +6,9 @@ from django.conf.urls import patterns, url
 from .utils import get_view
 
 
-catalog = patterns('',
-    url('^(?P<path>.*)$', get_view('catalog'), name='catalog'),
-)
-
-cart = patterns('',
-    url('^$',       get_view('cart'),       name='cart'),
-)
-
-order = patterns('',
+catalog = patterns('', url(r'^(?P<path>.*)$',   get_view('catalog'),    name='catalog'))
+cart    = patterns('', url(r'^$',               get_view('cart'),       name='cart'))
+order   = patterns('',
     url('^$',                       get_view('order_form'),     name='form'),
     url(r'^(?P<slug>[^/]+)/$',      get_view('order_confirm'),  name='confirm'),
     url(r'^(?P<slug>[^.]+).pdf$',   get_view('order_pdf'),      name='pdf'),
