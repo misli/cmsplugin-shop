@@ -97,7 +97,9 @@ class ProductAdmin(admin.ModelAdmin):
     ordering        = ['tree_id', 'lft']
     list_display    = ['name', 'parent']
     list_filter     = [('parent', CategoryTreeListFilter)]
-    inlines         = (ProductVariantInlineAdmin,)
+    inlines         = [ProductVariantInlineAdmin]
+    filter_horizontal   = ['related']
+    prepopulated_fields = {'slug': ('name',)}
 
     def lookup_allowed(self, key, value):
         return key in ['parent__lft__gte', 'parent__rght__lte', 'parent__tree_id'] \

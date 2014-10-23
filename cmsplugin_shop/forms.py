@@ -6,6 +6,7 @@ from datetime import date
 from django import forms
 from django.forms.models import inlineformset_factory
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext_lazy as _
 
 from .utils import get_model
 
@@ -41,6 +42,7 @@ CartForm = inlineformset_factory(
 
 
 class OrderForm(forms.ModelForm):
+    agreement = forms.BooleanField(label=_('I agree with terms and conditions'))
 
     class Meta:
         model   = get_model('Order')

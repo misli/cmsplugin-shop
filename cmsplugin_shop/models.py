@@ -108,6 +108,7 @@ class Product(Node):
     last_modified = models.DateTimeField(auto_now=True,
         verbose_name=_('Last modified'))
     unit_price = PriceField(_('Unit price'))
+    related = models.ManyToManyField('self', _('Related products'))
 
     can_have_children = False
 
@@ -252,7 +253,6 @@ class Order(PolymorphicModel):
     address     = models.TextField(_('Address'))
     note        = models.TextField(_('Note'), blank=True)
     shipping    = models.ForeignKey(Shipping, verbose_name=_('Shipping'))
-    agreement   = models.BooleanField(_('I agree with terms and conditions'), default=False)
 
     class Meta(object):
         ordering            = ('-date',)
