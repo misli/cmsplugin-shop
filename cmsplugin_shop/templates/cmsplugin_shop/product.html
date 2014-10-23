@@ -14,7 +14,8 @@
 
 <form method="post" action="">{% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="{% trans 'Add to cart' %}" />
+    <input name="add" type="submit" value="{% trans 'Add to cart' %}" />
+    <input name="add-and-cart" type="submit" value="{% trans 'Add and show the cart' %}" />
 </form>
 
 {% endblock %}

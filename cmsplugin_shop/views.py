@@ -132,7 +132,10 @@ class ProductView(FormView):
         return super(ProductView, self).form_valid(form)
 
     def get_success_url(self):
-        return self.kwargs['product'].get_absolute_url()
+        if 'add-and-cart' in self.request.POST:
+            return reverse('Cart:cart')
+        else:
+            return self.kwargs['product'].get_absolute_url()
 
 
 
