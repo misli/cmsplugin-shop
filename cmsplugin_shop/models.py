@@ -108,7 +108,7 @@ class Product(Node):
     last_modified = models.DateTimeField(auto_now=True,
         verbose_name=_('Last modified'))
     unit_price = PriceField(_('Unit price'))
-    related = models.ManyToManyField('self', _('Related products'))
+    related = models.ManyToManyField('self', _('Related products'), blank=True)
 
     can_have_children = False
 
