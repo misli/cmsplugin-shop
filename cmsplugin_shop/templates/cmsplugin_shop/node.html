@@ -13,7 +13,7 @@
 
 {% block specific_content %}{% endblock %}
 
-{% if request.user.is_staff %}
+{% if request.toolbar.use_draft %}
 </div>
 
 {% addtoblock 'js' %}
