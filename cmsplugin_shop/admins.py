@@ -11,6 +11,7 @@ from mptt.models import TreeForeignKey
 from cms.utils import get_language_from_request
 
 from .models import *
+from .utils import get_form
 
 
 class CategoryTreeListFilter(admin.FieldListFilter):
@@ -94,6 +95,7 @@ class ProductVariantInlineAdmin(admin.TabularInline):
     extra = 0
 
 class ProductAdmin(admin.ModelAdmin):
+    form            = get_form('Product')
     ordering        = ['tree_id', 'lft']
     list_display    = ['name', 'parent']
     list_filter     = [('parent', CategoryTreeListFilter)]

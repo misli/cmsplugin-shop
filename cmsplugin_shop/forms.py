@@ -7,9 +7,31 @@ from django import forms
 from django.forms.models import inlineformset_factory
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
+from tagging.forms import TagField
+from tagging.utils import edit_string_for_tags
 
 from .utils import get_model
 
+
+
+class ProductForm(forms.ModelForm):
+    tags = TagField(required=False, help_text=_(
+        'Enter space separated list of single word tags ' \
+        'or comma separated list of tags containing spaces. ' \
+        'Use doublequotes to enter name containing comma.'
+    ))
+
+    class Meta:
+        model   = get_model('Product')
+
+    def __init__(self, *args, **kwargs):
+        super(ProductForm, self).__init__(*args, **kwargs)
+        self.initial['tags'] = edit_string_for_tags(self.instance.tags.all())
+
+    def save(self, commit=True):
+        product = super(ProductForm, self).save(commit)
+        product.tags = self.cleaned_data['tags']
+        return product
 
 
 class CartItemForm(forms.ModelForm):
