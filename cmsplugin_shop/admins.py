@@ -7,11 +7,14 @@ from django.utils.encoding import smart_text, force_text
 from django.utils.translation import ugettext_lazy as _
 from django_mptt_admin.admin import DjangoMpttAdmin
 from mptt.models import TreeForeignKey
+from polymorphic_tree.admin import (
+    PolymorphicMPTTParentModelAdmin,
+    PolymorphicMPTTChildModelAdmin,
+)
 
 from cms.utils import get_language_from_request
 
-from .models import *
-from .utils import get_form
+from .utils import get_form, get_model, get_admin
 
 
 class CategoryTreeListFilter(admin.FieldListFilter):
@@ -24,7 +27,7 @@ class CategoryTreeListFilter(admin.FieldListFilter):
         self.lookup_val_lft      = request.GET.get(self.lookup_kwarg_lft, None)
         self.lookup_val_rght     = request.GET.get(self.lookup_kwarg_rght, None)
         self.lookup_val_isnull   = request.GET.get(self.lookup_kwarg_isnull, None)
-        self.lookup_choices      = Category.objects.order_by('tree_id', 'lft')
+        self.lookup_choices      = get_model('Category').objects.order_by('tree_id', 'lft')
         super(CategoryTreeListFilter, self).__init__(
             field, request, params, model, model_admin, field_path
         )
@@ -84,14 +87,21 @@ class CategoryTreeListFilter(admin.FieldListFilter):
 
 
 
-class CategoryAdmin(DjangoMpttAdmin):
+class CategoryAdmin(admin.ModelAdmin):
+    ordering        = ['tree_id', 'lft']
+    list_display    = ['name', 'parent']
+    list_filter     = [('parent', CategoryTreeListFilter)]
     prepopulated_fields = {'slug': ('name',)}
     trigger_save_after_move = True
+
+    def lookup_allowed(self, key, value):
+        return key in ['parent__lft__gte', 'parent__rght__lte', 'parent__tree_id'] \
+           and value.isdigit() and True or super(ProductAdmin, self).lookup_allowed(key, value)
 
 
 
 class ProductVariantInlineAdmin(admin.TabularInline):
-    model = ProductVariant
+    model = get_model('ProductVariant')
     extra = 0
 
 class ProductAdmin(admin.ModelAdmin):
@@ -106,6 +116,15 @@ class ProductAdmin(admin.ModelAdmin):
     def lookup_allowed(self, key, value):
         return key in ['parent__lft__gte', 'parent__rght__lte', 'parent__tree_id'] \
            and value.isdigit() and True or super(ProductAdmin, self).lookup_allowed(key, value)
+
+
+
+class NodeAdmin(PolymorphicMPTTParentModelAdmin):
+    base_model = get_model('Node')
+    child_models = (
+        (get_model('Category'), get_admin('Category')),
+        (get_model('Product'),  get_admin('Product')),
+    )
 
 
 

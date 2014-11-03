@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, generators, nested_scopes, pri
 from django.contrib import admin
 from .utils import get_model, get_admin
 
+admin.site.register(get_model('Node'),      get_admin('Node'))
 admin.site.register(get_model('Category'),  get_admin('Category'))
 admin.site.register(get_model('Product'),   get_admin('Product'))
 admin.site.register(get_model('Shipping'),  get_admin('Shipping'))

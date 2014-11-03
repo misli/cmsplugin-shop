@@ -54,6 +54,8 @@ class Node(PolymorphicMPTTModel):
     active      = models.BooleanField(default=False, verbose_name=_('Active'))
 
     class Meta:
+        verbose_name        = _('Tree node')
+        verbose_name_plural = _('Tree')
         unique_together = [('parent', 'slug')]
 
     def __str__(self):
