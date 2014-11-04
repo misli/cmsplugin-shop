@@ -13,8 +13,8 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
-from polymorphic.polymorphic_model import PolymorphicModel
-from polymorphic_tree.models import PolymorphicMPTTModel, PolymorphicTreeForeignKey
+from mptt.fields import TreeForeignKey
+from mptt.models import MPTTModel
 
 from .utils import currency, get_rand_hash, get_html_field
 
@@ -38,9 +38,9 @@ class PriceField(models.DecimalField):
 
 
 @python_2_unicode_compatible
-class Node(PolymorphicMPTTModel):
-    parent      = PolymorphicTreeForeignKey('self', verbose_name=_('Category'), blank=True, null=True,
-                    related_name='children', limit_choices_to={'polymorphic_ctype__name':'category'})
+class Node(MPTTModel):
+    parent      = TreeForeignKey('self', verbose_name=_('Category'), blank=True, null=True,
+                    related_name='children', limit_choices_to={'is_category':True})
     name        = models.CharField(_('Name'), max_length=250)
     slug        = models.SlugField(_('Slug'), max_length=250, db_index=True, unique=False)
     summary     = HTMLField(_('Summary'), blank=True, default='')
@@ -52,6 +52,7 @@ class Node(PolymorphicMPTTModel):
     meta_desc   = models.TextField(_('Meta description'), blank=True, default='',
                     help_text=_('The text displayed in search engines.'))
     active      = models.BooleanField(default=False, verbose_name=_('Active'))
+    is_category = models.BooleanField(default=False, editable=False)
 
     class Meta:
         verbose_name        = _('Tree node')
@@ -97,10 +98,14 @@ class Category(Node):
         return super(Category, self).get_descendants(*args, **kwargs)
 
     def get_descendants(self, *args, **kwargs):
-        return super(Category, self).get_descendants(*args, **kwargs).instance_of(Category)
+        return super(Category, self).get_descendants(*args, **kwargs).filter(is_category=True)
 
     def get_descendant_products(self, *args, **kwargs):
-        return super(Category, self).get_descendants(*args, **kwargs).instance_of(Product)
+        return super(Category, self).get_descendants(*args, **kwargs).filter(is_category=False)
+
+    def save(self, *args, **kwargs):
+        self.is_category = True
+        super(Category, self).save(*args, **kwargs)
 
 
 
@@ -111,8 +116,6 @@ class Product(Node):
         verbose_name=_('Last modified'))
     unit_price = PriceField(_('Unit price'))
     related = models.ManyToManyField('self', _('Related products'), blank=True)
-
-    can_have_children = False
 
     class Meta:
         verbose_name        = _('Product')
@@ -128,7 +131,7 @@ class Product(Node):
 
 
 @python_2_unicode_compatible
-class ProductVariant(PolymorphicModel):
+class ProductVariant(models.Model):
     product     = models.ForeignKey(Product, verbose_name=_('Product'), related_name='variants')
     name        = models.CharField(_('Name'), max_length=50)
     unit_price  = PriceField(_('Unit price'))
@@ -148,7 +151,7 @@ class ProductVariant(PolymorphicModel):
 
 
 @python_2_unicode_compatible
-class Cart(PolymorphicModel):
+class Cart(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
     class Meta(object):
@@ -171,7 +174,7 @@ class Cart(PolymorphicModel):
 
 
 @python_2_unicode_compatible
-class CartItem(PolymorphicModel):
+class CartItem(models.Model):
     cart        = models.ForeignKey(Cart,           verbose_name=_('Cart'),             related_name='items')
     product     = models.ForeignKey(Product,        verbose_name=_('Product'),          related_name='+')
     variant     = models.ForeignKey(ProductVariant, verbose_name=_('Product variant'),  related_name='+',
@@ -206,7 +209,7 @@ class CartItem(PolymorphicModel):
 
 
 @python_2_unicode_compatible
-class Shipping(PolymorphicModel):
+class Shipping(models.Model):
     name        = models.CharField(_('Name'), max_length=150)
     description = HTMLField(_('Address'), blank=True, default='')
     price       = PriceField(_('Price'))
@@ -226,7 +229,7 @@ class Shipping(PolymorphicModel):
 
 
 @python_2_unicode_compatible
-class OrderState(PolymorphicModel):
+class OrderState(models.Model):
     code        = models.SlugField(_('Code'))
     name        = models.CharField(_('Name'), max_length=150)
     description = HTMLField(_('Description'), blank=True, default='')
@@ -241,10 +244,9 @@ class OrderState(PolymorphicModel):
 
 
 @python_2_unicode_compatible
-class Order(PolymorphicModel):
+class Order(models.Model):
     slug        = models.SlugField(editable=False)
     date        = models.DateTimeField(auto_now_add=True, editable=False)
-    confirmed   = models.BooleanField(_('Confirmed'), default=False, editable=False)
     cart        = models.OneToOneField(Cart, verbose_name=_('Cart'), editable=False)
     state       = models.ForeignKey(OrderState, verbose_name=_('State'))
     first_name  = models.CharField(_('First name'), max_length=30)
@@ -254,6 +256,7 @@ class Order(PolymorphicModel):
                     RegexValidator(r'^\+?[0-9 ]+$')])
     address     = models.TextField(_('Address'))
     note        = models.TextField(_('Note'), blank=True)
+    comment     = models.TextField(_('Internal comment'), blank=True)
     shipping    = models.ForeignKey(Shipping, verbose_name=_('Shipping'))
 
     class Meta(object):

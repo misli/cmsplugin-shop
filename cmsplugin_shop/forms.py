@@ -68,7 +68,8 @@ class OrderForm(forms.ModelForm):
 
     class Meta:
         model   = get_model('Order')
-        exclude = ['state', 'slug']
+        exclude = ['state', 'comment']
+
 
 
 

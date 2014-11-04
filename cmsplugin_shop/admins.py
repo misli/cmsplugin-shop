@@ -119,12 +119,10 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 
-class NodeAdmin(PolymorphicMPTTParentModelAdmin):
-    base_model = get_model('Node')
-    child_models = (
-        (get_model('Category'), get_admin('Category')),
-        (get_model('Product'),  get_admin('Product')),
-    )
+class NodeAdmin(DjangoMpttAdmin):
+    def has_add_permission(self, request):
+        # Nodes must always be added as Product or Category
+        return False
 
 
 

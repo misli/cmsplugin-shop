@@ -22,6 +22,7 @@ from .models import Node
 from .utils import get_model, get_view, get_form
 
 
+
 class PdfViewMixin(object):
     """
     A base view for displaying a Pdf
@@ -60,44 +61,49 @@ class CatalogView(View):
     def dispatch(self, request, path):
         slug_list = [slug for slug in path.split('/') if slug]
 
+        # do not allow disabled nodes if user is not staff
+        if request.user.is_staff:
+            active = {}
+        else:
+            active = {'active':True}
+
         # display root view, if the path is empty
         if not slug_list:
-            kwargs = request.user.is_staff and {
-                'categories': self.category_model.objects.filter(level=0).order_by('tree_id'),
-                'products':   self.product_model.objects.filter(level=0).order_by('tree_id'),
-            } or {
-                'categories': self.category_model.objects.filter(level=0, active=True).order_by('tree_id'),
-                'products':   self.product_model.objects.filter(level=0, active=True).order_by('tree_id'),
-            }
-            return self.root_view(request, **kwargs)
+            return self.root_view(request,
+                categories  = self.category_model.objects.filter(level=0, **active).order_by('tree_id'),
+                products    = self.product_model.objects.filter(level=0, **active).order_by('tree_id'),
+            )
 
         # handle cms subpages
         if request.current_page.application_namespace != 'Catalog':
             return cms_page(request, path)
 
-        # lookup node by path
-        node = None
-        for slug in slug_list:
-            node = get_object_or_404(Node, parent=node, slug=slug)
+        # lookup parent node
+        parent = None
+        for slug in slug_list[:-1]:
+            parent = get_object_or_404(Node, parent=parent, slug=slug, **active)
 
-        kwargs = {'node': node}
+        # last slug
+        slug = slug_list[-1]
 
-        # display category view
-        if isinstance(node, self.category_model):
-            kwargs['category'] = node
-            if request.user.is_staff:
-                kwargs['categories'] = node.get_children().instance_of(self.category_model)
-                kwargs['products']   = node.get_children().instance_of(self.product_model)
-            else:
-                kwargs['categories'] = node.get_children().instance_of(self.category_model).filter(active=True)
-                kwargs['products']   = node.get_children().instance_of(self.product_model).filter(active=True)
-            return self.category_view(request, **kwargs)
+        # display product view
+        try:
+            product = self.product_model.objects.get(parent=parent, slug=slug, **active)
+            return self.product_view(request,
+                count_in_cart   = sum([ i.quantity for i in request.cart.all_items if i.product == product ]),
+                node            = product,
+                product         = product,
+            )
+        except self.product_model.DoesNotExist:
+            # or category view
+            category = get_object_or_404(self.category_model, parent=parent, slug=slug, **active)
+            return self.category_view(request,
+                node        = category,
+                category    = category,
+                categories  = self.category_model.objects.filter(parent=category, **active).order_by('lft'),
+                products    = self.product_model.objects.filter(parent=category, **active).order_by('lft'),
+            )
 
-        # or product view
-        else:
-            kwargs['count_in_cart'] = sum([ i.quantity for i in request.cart.all_items if i.product == node ])
-            kwargs['product'] = node
-            return self.product_view(request, **kwargs)
 
 
 
