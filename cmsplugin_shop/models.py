@@ -245,6 +245,7 @@ class OrderState(models.Model):
 
 @python_2_unicode_compatible
 class Order(models.Model):
+    user        = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
     slug        = models.SlugField(editable=False)
     date        = models.DateTimeField(auto_now_add=True, editable=False)
     cart        = models.OneToOneField(Cart, verbose_name=_('Cart'), editable=False)

@@ -64,12 +64,15 @@ CartForm = inlineformset_factory(
 
 
 class OrderForm(forms.ModelForm):
-    agreement = forms.BooleanField(label=_('I agree with terms and conditions'))
 
     class Meta:
         model   = get_model('Order')
-        exclude = ['state', 'comment']
+        exclude = ['user', 'state', 'comment']
 
 
+
+class OrderConfirmForm(forms.Form):
+    agreement = forms.BooleanField(label=_('I agree with terms and conditions'))
+    pass
 
 

@@ -1,0 +1,25 @@
+{% load i18n shop_tags %}
+
+<table class="table">
+    <tr>
+        <th>{% trans 'First name' %}</th>       <td>{{ order.first_name }}</td>
+        <th>{% trans 'Last name' %}</th>        <td>{{ order.last_name }}</td>
+    </tr>
+    <tr>
+        <th>{% trans 'Phone' %}</th>            <td>{{ order.phone }}</td>
+        <th>{% trans 'Email' %}</th>            <td>{{ order.email }}</td>
+    </tr>
+    <tr>
+        <th>{% trans 'Address' %}</th>          <td>{{ order.address }}</td>
+        <th>{% trans 'Note' %}</th>             <td>{{ order.note }}</td>
+    <tr>
+    <tr>
+        <th>{% trans 'Shipping' %}</th>         <td>{{ order.shipping }}</td>
+        <th>{% trans 'Payment' %}</th>          <td>{{ order.payment }}</td>
+    <tr>
+    <tr>
+        <th>{% trans 'Order total' %}</th>
+        <th class="currency">{{ order.get_price | currency }}</th>
+    </tr>
+</table>
+

@@ -7,6 +7,8 @@
 
 <h1>{% trans 'Order accepted' %}</h1>
 
-<p>{% trans 'Order accepted' %}</p>
+{% include 'cmsplugin_shop/order_confirm_cart.html' with cart=order.cart %}
+
+{% include 'cmsplugin_shop/order_confirm_details.html' %}
 
 {% endblock %}

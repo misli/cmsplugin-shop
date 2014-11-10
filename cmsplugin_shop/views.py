@@ -5,10 +5,11 @@ import cStringIO
 from cms.views import details as cms_page
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.formtools.wizard.views import SessionWizardView
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.forms import ModelForm
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
@@ -50,13 +51,58 @@ class PdfViewMixin(object):
 
 
 
-class CatalogView(View):
-    root_view       = None
-    category_view   = None
-    product_view    = None
+class ProductView(FormView):
+    form_class = get_form('CartItem')
 
-    category_model  = None
-    product_model   = None
+    def get_context_data(self, **kwargs):
+        self.kwargs.update(kwargs)
+        return self.kwargs
+
+    def get_form_kwargs(self):
+        kwargs = super(ProductView, self).get_form_kwargs()
+        kwargs['product'] = self.kwargs['product']
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.cart      = self.request.cart
+        form.instance.product   = self.kwargs['product']
+        try:
+            item = form.instance.__class__.objects.get(
+                cart    = form.instance.cart,
+                product = form.instance.product,
+                variant = form.instance.variant,
+            )
+            item.quantity += form.instance.quantity
+            item.save()
+        except form.instance.__class__.DoesNotExist:
+            form.instance.save()
+        messages.add_message(self.request, messages.INFO,
+            mark_safe(_('Product has been added to <a href="{}">shopping cart</a>').format(reverse('Cart:cart')))
+        )
+        return super(ProductView, self).form_valid(form)
+
+    def get_success_url(self):
+        if 'add-and-cart' in self.request.POST:
+            return reverse('Cart:cart')
+        else:
+            return self.kwargs['product'].get_absolute_url()
+
+
+
+# catalog views
+root        = TemplateView.as_view(template_name='cmsplugin_shop/root.html')
+category    = TemplateView.as_view(template_name='cmsplugin_shop/category.html')
+product     = ProductView.as_view(template_name='cmsplugin_shop/product.html')
+
+
+
+class CatalogView(View):
+    root_view       = staticmethod(get_view('root'))
+    category_view   = staticmethod(get_view('category'))
+    product_view    = staticmethod(get_view('product'))
+
+    category_model  = get_model('Category')
+    product_model   = get_model('Product')
 
     def dispatch(self, request, path):
         slug_list = [slug for slug in path.split('/') if slug]
@@ -104,64 +150,14 @@ class CatalogView(View):
                 products    = self.product_model.objects.filter(parent=category, **active).order_by('lft'),
             )
 
-
-
-
-class ProductView(FormView):
-    form_class = get_form('CartItem')
-
-    def get_context_data(self, **kwargs):
-        self.kwargs.update(kwargs)
-        return self.kwargs
-
-    def get_form_kwargs(self):
-        kwargs = super(ProductView, self).get_form_kwargs()
-        kwargs['product'] = self.kwargs['product']
-        return kwargs
-
-    def form_valid(self, form):
-        form.instance.cart      = self.request.cart
-        form.instance.product   = self.kwargs['product']
-        try:
-            item = form.instance.__class__.objects.get(
-                cart    = form.instance.cart,
-                product = form.instance.product,
-                variant = form.instance.variant,
-            )
-            item.quantity += form.instance.quantity
-            item.save()
-        except form.instance.__class__.DoesNotExist:
-            form.instance.save()
-        messages.add_message(self.request, messages.INFO,
-            mark_safe(_('Product has been added to <a href="{}">shopping cart</a>').format(reverse('Cart:cart')))
-        )
-        return super(ProductView, self).form_valid(form)
-
-    def get_success_url(self):
-        if 'add-and-cart' in self.request.POST:
-            return reverse('Cart:cart')
-        else:
-            return self.kwargs['product'].get_absolute_url()
-
-
-
-root        = TemplateView.as_view(template_name='cmsplugin_shop/root.html')
-category    = TemplateView.as_view(template_name='cmsplugin_shop/category.html')
-product     = ProductView.as_view(template_name='cmsplugin_shop/product.html')
-catalog     = CatalogView.as_view(
-    root_view       = get_view('root'),
-    category_view   = get_view('category'),
-    product_view    = get_view('product'),
-    category_model  = get_model('Category'),
-    product_model   = get_model('Product'),
-)
+catalog = CatalogView.as_view()
 
 
 
 class CartView(UpdateView):
-    form_class = get_form('Cart')
-    model = get_model('Cart')
-    template_name='cmsplugin_shop/cart.html'
+    form_class      = get_form('Cart')
+    model           = get_model('Cart')
+    template_name   = 'cmsplugin_shop/cart.html'
 
     def get_object(self, queryset=None):
         return self.request.cart
@@ -176,29 +172,63 @@ cart = CartView.as_view()
 
 
 
-class OrderFormView(CreateView):
-    form_class = get_form('Order')
-    model = get_model('Order')
+class OrderFormView(SessionWizardView):
+    order_model         = get_model('Order')
+    order_state_model   = get_model('OrderState')
+    template_name       = 'cmsplugin_shop/order_form.html'
+    form_list           = [
+        get_form('Order'),
+        get_form('OrderConfirm')
+    ]
+    initial_state_code = getattr(
+        settings, 'CMSPLUGIN_SHOP_INITIAL_ORDER_STATE', 'new'
+    )
 
-    def form_valid(self, form):
-        initial_state_code = getattr(
-            settings, 'CMSPLUGIN_SHOP_INITIAL_ORDER_STATE', 'new'
-        )
-        OrderState = get_model('OrderState')
+    def get_form_initial(self, step):
+        initial = {}
+        if step == '0' and self.request.user.is_authenticated():
+            # request.user may have different attributes
+            # see https://docs.djangoproject.com/en/dev/topics/auth/customizing/
+            for attr in 'first_name', 'last_name', 'email', 'phone', 'address':
+                if hasattr(self.request.user, attr):
+                    initial[attr] = getattr(self.request.user, attr)
+        return initial
+
+    def get_order(self):
+        # create order using data from first form
+        order = self.order_model(**self.get_cleaned_data_for_step('0'))
+
+        # find get initial order_state
         try:
-            state = OrderState.objects.get(code=initial_state_code)
-        except OrderState.DoesNotExist:
-            state = OrderState(code=initial_state_code, name='New')
+            state = self.order_state_model.objects.get(code=self.initial_state_code)
+        except self.order_state_model.DoesNotExist:
+            state = self.order_state_model(code=self.initial_state_code, name='New')
             state.save()
-        form.instance.state = state
-        form.instance.cart  = self.request.cart
-        response = super(OrderFormView, self).form_valid(form)
-        del(self.request.session['cart_id'])
-        del(self.request.cart)
-        return response
 
-    def get_success_url(self):
-        return reverse('Order:confirm', kwargs={'slug':self.object.slug})
+        # set order.state and cart
+        order.state = state
+        order.cart  = self.request.cart
+        if self.request.user.is_authenticated():
+            order.user = self.request.user
+        return order
+
+    def get_context_data(self, form, **kwargs):
+        context = super(OrderFormView, self).get_context_data(form=form, **kwargs)
+        if self.steps.current == '1':
+            context.update({'order': self.get_order()})
+        return context
+
+    def done(self, form_list, **kwargs):
+        # get order
+        order = self.get_order()
+
+        # save order
+        order.save()
+
+        # redirect to order detail
+        return HttpResponseRedirect(
+            reverse('Order:confirm', kwargs={'slug':order.slug})
+        )
 
 order_form = OrderFormView.as_view()
 
