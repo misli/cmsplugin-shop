@@ -27,15 +27,15 @@
     {% else %}
         {{ wizard.form }}
     {% endif %}
-    <tr>
-        <td>
-            {% if wizard.steps.prev %}
-            <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">{% trans "prev step" %}</button>
-            {% endif %}
-        </td>
-        <td><input type="submit" value="{% trans 'Continue' %}" /></td>
-    </tr>
 </table>
+{% if wizard.steps.prev %}
+<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">{% trans 'Back' %}</button>
+{% endif %}
+{% if wizard.steps.next %}
+<input type="submit" value="{% trans 'Continue' %}" /></td>
+{% else %}
+<input type="submit" value="{% trans 'Submit order' %}" /></td>
+{% endif %}
 </form>
 
 {% endblock %}
