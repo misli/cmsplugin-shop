@@ -40,7 +40,7 @@ class PriceField(models.DecimalField):
 @python_2_unicode_compatible
 class Node(MPTTModel):
     parent      = TreeForeignKey('self', verbose_name=_('Category'), blank=True, null=True,
-                    related_name='children', limit_choices_to={'is_category':True})
+                    related_name='children', limit_choices_to={'product':None})
     name        = models.CharField(_('Name'), max_length=250)
     slug        = models.SlugField(_('Slug'), max_length=250, db_index=True, unique=False)
     summary     = HTMLField(_('Summary'), blank=True, default='')
@@ -52,7 +52,6 @@ class Node(MPTTModel):
     meta_desc   = models.TextField(_('Meta description'), blank=True, default='',
                     help_text=_('The text displayed in search engines.'))
     active      = models.BooleanField(default=False, verbose_name=_('Active'))
-    is_category = models.BooleanField(default=False, editable=False)
 
     class Meta:
         verbose_name        = _('Tree node')
@@ -94,18 +93,10 @@ class Category(Node):
         verbose_name        = _('Category')
         verbose_name_plural = _('Categories')
 
-    def get_descendants_all(self, *args, **kwargs):
-        return super(Category, self).get_descendants(*args, **kwargs)
-
-    def get_descendants(self, *args, **kwargs):
-        return super(Category, self).get_descendants(*args, **kwargs).filter(is_category=True)
-
-    def get_descendant_products(self, *args, **kwargs):
-        return super(Category, self).get_descendants(*args, **kwargs).filter(is_category=False)
-
-    def save(self, *args, **kwargs):
-        self.is_category = True
-        super(Category, self).save(*args, **kwargs)
+    @staticmethod
+    def register(category_model):
+        Node.category.related.model = category_model
+        return category_model
 
 
 
@@ -117,6 +108,8 @@ class Product(Node):
     unit_price = PriceField(_('Unit price'))
     related = models.ManyToManyField('self', _('Related products'), blank=True)
 
+    can_have_children = False
+
     class Meta:
         verbose_name        = _('Product')
         verbose_name_plural = _('Products')
@@ -127,6 +120,11 @@ class Product(Node):
     @cached_property
     def all_variants(self):
         return list(self.variants.all())
+
+    @staticmethod
+    def register(product_model):
+        Node.product.related.model = product_model
+        return product_model
 
 
 
@@ -330,4 +328,5 @@ class CategoryPlugin(CMSPlugin):
     @cached_property
     def render_template(self):
         return 'cmsplugin_shop/category/%s.html' % self.template
+
 

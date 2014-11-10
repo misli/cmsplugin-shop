@@ -116,25 +116,22 @@ class CatalogView(View):
         # display root view, if the path is empty
         if not slug_list:
             return self.root_view(request,
-                categories  = self.category_model.objects.filter(level=0, **active).order_by('tree_id'),
-                products    = self.product_model.objects.filter(level=0, **active).order_by('tree_id'),
+                categories  = self.category_model.objects.filter(parent=None, **active),
+                products    = self.product_model.objects.filter(parent=None, **active),
             )
 
         # handle cms subpages
         if request.current_page.application_namespace != 'Catalog':
             return cms_page(request, path)
 
-        # lookup parent node
-        parent = None
-        for slug in slug_list[:-1]:
-            parent = get_object_or_404(Node, parent=parent, slug=slug, **active)
-
-        # last slug
-        slug = slug_list[-1]
+        # lookup node by path
+        node = None
+        for slug in slug_list:
+            node = get_object_or_404(Node, parent=node, slug=slug, **active)
 
         # display product view
         try:
-            product = self.product_model.objects.get(parent=parent, slug=slug, **active)
+            product = node.product
             return self.product_view(request,
                 count_in_cart   = sum([ i.quantity for i in request.cart.all_items if i.product == product ]),
                 node            = product,
@@ -142,12 +139,12 @@ class CatalogView(View):
             )
         except self.product_model.DoesNotExist:
             # or category view
-            category = get_object_or_404(self.category_model, parent=parent, slug=slug, **active)
+            category = node.category
             return self.category_view(request,
                 node        = category,
                 category    = category,
-                categories  = self.category_model.objects.filter(parent=category, **active).order_by('lft'),
-                products    = self.product_model.objects.filter(parent=category, **active).order_by('lft'),
+                categories  = self.category_model.objects.filter(parent=node, **active),
+                products    = self.product_model.objects.filter(parent=node, **active),
             )
 
 catalog = CatalogView.as_view()
