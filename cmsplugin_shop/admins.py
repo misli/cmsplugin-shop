@@ -7,10 +7,6 @@ from django.utils.encoding import smart_text, force_text
 from django.utils.translation import ugettext_lazy as _
 from django_mptt_admin.admin import DjangoMpttAdmin
 from mptt.models import TreeForeignKey
-from polymorphic_tree.admin import (
-    PolymorphicMPTTParentModelAdmin,
-    PolymorphicMPTTChildModelAdmin,
-)
 
 from cms.utils import get_language_from_request
 
