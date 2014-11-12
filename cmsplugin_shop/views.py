@@ -180,15 +180,21 @@ class OrderFormView(SessionWizardView):
     initial_state_code = getattr(
         settings, 'CMSPLUGIN_SHOP_INITIAL_ORDER_STATE', 'new'
     )
+    profile_attr = getattr(
+        settings, 'AUTH_USER_PROFILE_ATTRIBUTE', 'profile'
+    )
 
     def get_form_initial(self, step):
         initial = {}
         if step == '0' and self.request.user.is_authenticated():
-            # request.user may have different attributes
-            # see https://docs.djangoproject.com/en/dev/topics/auth/customizing/
-            for attr in 'first_name', 'last_name', 'email', 'phone', 'address':
+            for attr in 'first_name', 'last_name', 'email':
                 if hasattr(self.request.user, attr):
                     initial[attr] = getattr(self.request.user, attr)
+            if hasattr(self.request.user, self.profile_attr):
+                profile = getattr(self.request.user, self.profile_attr)
+                for attr in 'phone', 'address':
+                    if hasattr(profile, attr):
+                        initial[attr] = getattr(profile, attr)
         return initial
 
     def get_order(self):

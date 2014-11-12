@@ -73,6 +73,5 @@ class OrderForm(forms.ModelForm):
 
 class OrderConfirmForm(forms.Form):
     agreement = forms.BooleanField(label=_('I agree with terms and conditions'))
-    pass
 
 
