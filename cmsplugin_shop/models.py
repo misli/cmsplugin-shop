@@ -267,7 +267,7 @@ class Order(models.Model):
         return '{} {} {}'.format(self.date, self.first_name, self.last_name)
 
     def get_absolute_url(self):
-        return reverse('Order:pdf', kwargs={'slug':self.slug})
+        return reverse('Order:confirm', kwargs={'slug':self.slug})
 
     def get_price(self):
         return self.cart.get_price() + self.shipping.get_price()
