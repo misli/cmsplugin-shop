@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from cms.app_base import CMSApp
 from cms.apphook_pool import apphook_pool
-from .urls import catalog, cart, order
+from .urls import catalog, cart, order, my_orders
 
 
 @apphook_pool.register
@@ -28,5 +28,12 @@ class OrderApp(CMSApp):
     name     = _('Order')
     urls     = [order]
     app_name = 'Order'
+
+
+@apphook_pool.register
+class MyOrdersApp(CMSApp):
+    name     = _('My orders')
+    urls     = [my_orders]
+    app_name = 'MyOrders'
 
 

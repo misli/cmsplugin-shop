@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-10 22:34+0100\n"
+"POT-Creation-Date: 2014-11-24 01:49+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Jakub Dorňák <jakub.dornak@misli.cz>\n"
 "Language: Czech\n"
@@ -24,16 +24,20 @@ msgstr "Všechny"
 msgid "Catalog"
 msgstr "Katalog"
 
-#: cms_app.py:21 models.py:156 models.py:176 models.py:249
+#: cms_app.py:21 models.py:156 models.py:176 models.py:250
 msgid "Cart"
 msgstr "Košík"
 
-#: cms_app.py:28 models.py:263 templates/cmsplugin_shop/order_form.html:4
+#: cms_app.py:28 models.py:264 templates/cmsplugin_shop/order_form.html:4
 #: templates/cmsplugin_shop/order_form.html:9
 #: templates/cmsplugin_shop/order_pdf.html:6
 #: templates/cmsplugin_shop/order_pdf.html:15
 msgid "Order"
 msgstr "Objednávka"
+
+#: cms_app.py:35
+msgid "My orders"
+msgstr "Moje objednávky"
 
 #: cms_toolbars.py:14
 msgid "Shop"
@@ -59,7 +63,7 @@ msgstr ""
 msgid "I agree with terms and conditions"
 msgstr "Souhlasím s obchodními podmínkami"
 
-#: models.py:42 models.py:93 models.py:320 plugins.py:30
+#: models.py:42 models.py:93 models.py:321 plugins.py:30
 msgid "Category"
 msgstr "Kategorie"
 
@@ -137,7 +141,7 @@ msgstr "Jednotková cena"
 msgid "Related products"
 msgstr "Příbuzné produkty"
 
-#: models.py:114 models.py:133 models.py:177 models.py:304 plugins.py:12
+#: models.py:114 models.py:133 models.py:177 models.py:305 plugins.py:12
 #: templates/cmsplugin_shop/cart.html:13
 #: templates/cmsplugin_shop/order_confirm_cart.html:5
 #: templates/cmsplugin_shop/order_pdf.html:18
@@ -178,7 +182,7 @@ msgstr "Položka košíku"
 msgid "Cart items"
 msgstr "Položky košíku"
 
-#: models.py:212 models.py:256
+#: models.py:212 models.py:257
 #: templates/cmsplugin_shop/order_confirm_details.html:13
 msgid "Address"
 msgstr "Adresa"
@@ -189,7 +193,7 @@ msgstr "Adresa"
 msgid "Price"
 msgstr "Cena"
 
-#: models.py:218 models.py:259
+#: models.py:218 models.py:260
 #: templates/cmsplugin_shop/order_confirm_details.html:17
 msgid "Shipping"
 msgstr "Doručování"
@@ -210,47 +214,47 @@ msgstr "Stav objednávky"
 msgid "Order states"
 msgstr "Stavy objednávek"
 
-#: models.py:250
+#: models.py:251
 msgid "State"
 msgstr "Stav"
 
-#: models.py:251 templates/cmsplugin_shop/order_confirm_details.html:5
+#: models.py:252 templates/cmsplugin_shop/order_confirm_details.html:5
 msgid "First name"
 msgstr "Křestní jméno"
 
-#: models.py:252 templates/cmsplugin_shop/order_confirm_details.html:6
+#: models.py:253 templates/cmsplugin_shop/order_confirm_details.html:6
 msgid "Last name"
 msgstr "Příjmení"
 
-#: models.py:253
+#: models.py:254
 msgid "E-mail"
 msgstr "E-mail"
 
-#: models.py:254 templates/cmsplugin_shop/order_confirm_details.html:9
+#: models.py:255 templates/cmsplugin_shop/order_confirm_details.html:9
 msgid "Phone"
 msgstr "Telefon"
 
-#: models.py:257 templates/cmsplugin_shop/order_confirm_details.html:14
+#: models.py:258 templates/cmsplugin_shop/order_confirm_details.html:14
 msgid "Note"
 msgstr "Poznámka"
 
-#: models.py:258
+#: models.py:259
 msgid "Internal comment"
 msgstr "Interní komentář"
 
-#: models.py:264
+#: models.py:265
 msgid "Orders"
 msgstr "Objednávky"
 
-#: models.py:294 models.py:297
+#: models.py:295 models.py:298
 msgid "Default"
 msgstr "Výchozí"
 
-#: models.py:305 models.py:321
+#: models.py:306 models.py:322
 msgid "Template"
 msgstr "Šablona "
 
-#: models.py:307 models.py:323
+#: models.py:308 models.py:324
 msgid "The template used to render plugin."
 msgstr "Šablona použitá pro zobrazení položky obsahu."
 
@@ -318,6 +322,6 @@ msgstr "Přidat do košíku"
 msgid "Add and show the cart"
 msgstr "Přidat a zobrazit košík"
 
-#: views.py:80
+#: views.py:82
 msgid "Product has been added to <a href=\"{}\">shopping cart</a>"
 msgstr "Produkt byl přidán do <a href=\"{}\">nákupního košíku</a>"

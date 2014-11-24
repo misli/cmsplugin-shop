@@ -1,0 +1,22 @@
+{% extends 'cmsplugin_shop/base.html' %}
+{% load cms_tags i18n %}
+
+{% block content %}
+
+<h1 class="customer">{% page_attribute "title" %}</h1>
+
+{% if orders.count %}
+<div class="list_orders">
+    <ul>
+        {% for order in orders %}
+        <li>
+            <a href="{{ order.get_absolute_url }}">{{ order.date }}</a>
+            <span title="{{ order.state.description }}">{{ order.state.name }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% endblock %}
+

@@ -5,6 +5,7 @@ import cStringIO
 from cms.views import details as cms_page
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.formtools.wizard.views import SessionWizardView
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
@@ -14,7 +15,8 @@ from django.shortcuts import render, get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import (
-    View, TemplateView, FormView, UpdateView, CreateView, DetailView
+    CreateView, DetailView, FormView, ListView,
+    TemplateView, UpdateView, View,
 )
 from os.path import basename
 from xhtml2pdf import pisa
@@ -250,5 +252,22 @@ class OrderPdfView(PdfViewMixin, DetailView):
     template_name_suffix = '_pdf'
 
 order_pdf = OrderPdfView.as_view()
+
+
+
+class MyOrdersView(ListView):
+    model = get_model('Order')
+    template_name = 'cmsplugin_shop/my_orders.html'
+
+    def get_queryset(self):
+        user = self.request.user
+        return self.model._default_manager.filter(user=user)
+
+    def get_context_data(self):
+        context = super(MyOrdersView, self).get_context_data()
+        context['orders'] = context['object_list']
+        return context
+
+my_orders = login_required(MyOrdersView.as_view())
 
 
