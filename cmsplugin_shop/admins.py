@@ -103,8 +103,8 @@ class ProductVariantInlineAdmin(admin.TabularInline):
 class ProductAdmin(admin.ModelAdmin):
     form            = get_form('Product')
     ordering        = ['tree_id', 'lft']
-    list_display    = ['name', 'parent']
-    list_filter     = [('parent', CategoryTreeListFilter)]
+    list_display    = ['name', 'parent', 'active']
+    list_filter     = ['active', ('parent', CategoryTreeListFilter)]
     inlines         = [ProductVariantInlineAdmin]
     filter_horizontal   = ['related']
     prepopulated_fields = {'slug': ('name',)}
@@ -130,7 +130,7 @@ class OrderStateAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     readonly_fields = ['cart']
     list_filter     = ['state']
-    list_display    = ['first_name', 'last_name', 'email', 'phone', 'address', 'shipping', 'state', 'cart']
+    list_display    = ['date', 'first_name', 'last_name', 'email', 'phone', 'address', 'shipping', 'state', 'get_price', 'cart']
 
 
 

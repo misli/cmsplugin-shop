@@ -116,6 +116,7 @@ class Product(Node):
 
     def get_price(self):
         return self.unit_price
+    get_price.short_description = _('Price')
 
     @cached_property
     def all_variants(self):
@@ -145,6 +146,7 @@ class ProductVariant(models.Model):
 
     def get_price(self):
         return self.unit_price or self.product.unit_price
+    get_price.short_description = _('Price')
 
 
 
@@ -168,6 +170,7 @@ class Cart(models.Model):
 
     def get_price(self):
         return sum(item.get_price() for item in self.all_items)
+    get_price.short_description = _('Price')
 
 
 
@@ -196,6 +199,7 @@ class CartItem(models.Model):
         return self.variant \
            and (self.variant.get_price() * self.quantity) \
             or (self.product.get_price() * self.quantity)
+    get_price.short_description = _('Price')
 
     def save(self):
         if self.quantity == 0:
@@ -243,7 +247,7 @@ class OrderState(models.Model):
 
 @python_2_unicode_compatible
 class Order(models.Model):
-    user        = models.ForeignKey(settings.AUTH_USER_MODEL, null=True,
+    user        = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
                     on_delete=models.SET_NULL)
     slug        = models.SlugField(editable=False)
     date        = models.DateTimeField(auto_now_add=True, editable=False)
