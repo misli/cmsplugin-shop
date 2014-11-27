@@ -20,9 +20,6 @@ class ProductPlugin(CMSPluginBase):
         })
         return context
 
-    def icon_src(self, instance):
-        return instance.product.get_photo_url()
-
 
 
 class CategoryPlugin(CMSPluginBase):
@@ -38,6 +35,4 @@ class CategoryPlugin(CMSPluginBase):
         })
         return context
 
-    def icon_src(self, instance):
-        return instance.category.get_photo_url()
 
