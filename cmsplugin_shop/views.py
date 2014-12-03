@@ -7,7 +7,9 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.formtools.wizard.views import SessionWizardView
+from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
+from django.core.mail import mail_managers
 from django.core.urlresolvers import reverse
 from django.forms import ModelForm
 from django.http import HttpResponse, HttpResponseRedirect
@@ -230,10 +232,22 @@ class OrderFormView(SessionWizardView):
         # save order
         order.save()
 
-        # redirect to order detail
-        return HttpResponseRedirect(
-            reverse('Order:confirm', kwargs={'slug':order.slug})
+        # confirm url
+        confirm_url = reverse('Order:confirm', kwargs={'slug':order.slug})
+
+        # site
+        site = Site.objects.get_current()
+
+        # send mail
+        mail_managers(
+            _('New Order'),
+            _('New order has been submitted in Your e-shop.\n{}').format(
+                'https://{}{}'.format(site.domain, confirm_url)
+            ),
         )
+
+        # redirect to order detail
+        return HttpResponseRedirect(confirm_url)
 
 order_form = OrderFormView.as_view()
 
