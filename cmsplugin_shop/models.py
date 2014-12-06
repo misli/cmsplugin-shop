@@ -5,67 +5,65 @@ from __future__ import absolute_import, division, generators, nested_scopes, pri
 import tagging
 
 from cms.models import CMSPlugin
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
+from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from mptt.fields import TreeForeignKey
-from mptt.models import MPTTModel
+from mptt.models import MPTTModelBase
 
-from .utils import currency, get_rand_hash, get_html_field
+from . import settings
+from .price import Price
+from .utils import get_rand_hash, get_html_field, get_mixin
 
 
 # allow different implementation of HTMLField
 HTMLField = get_html_field()
 
-DECIMAL_PLACES  = getattr(settings, 'CMSPLUGIN_SHOP_PRICE_DECIMAL_PLACES', 2)
-MAX_DIGITS      = getattr(settings, 'CMSPLUGIN_SHOP_PRICE_MAX_DIGITS', 9)
-
 
 
 class PriceField(models.DecimalField):
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('decimal_places', DECIMAL_PLACES)
-        kwargs.setdefault('max_digits',     MAX_DIGITS)
-        kwargs.setdefault('blank',          True)
-        kwargs.setdefault('null',           True)
+        kwargs.setdefault('decimal_places', settings.DECIMAL_PLACES)
+        kwargs.setdefault('max_digits',     settings.MAX_DIGITS)
         super(PriceField, self).__init__(*args, **kwargs)
 
 
 
+class TaxRateField(models.DecimalField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('decimal_places', 4)
+        kwargs.setdefault('max_digits',     9)
+        kwargs.setdefault('choices',        settings.TAX_RATES.items())
+        kwargs.setdefault('default',        settings.DEFAULT_TAX_RATE)
+        super(TaxRateField, self).__init__(*args, **kwargs)
+
+
+
 @python_2_unicode_compatible
-class Node(MPTTModel):
-    parent      = TreeForeignKey('self', verbose_name=_('Category'), blank=True, null=True,
+class NodeBase(models.Model):
+    parent      = TreeForeignKey('self', verbose_name=_('category'), blank=True, null=True,
                     related_name='children', limit_choices_to={'product':None})
-    name        = models.CharField(_('Name'), max_length=250)
-    slug        = models.SlugField(_('Slug'), max_length=250, db_index=True, unique=False)
-    summary     = HTMLField(_('Summary'), blank=True, default='')
-    description = HTMLField(_('Description'), blank=True, default='')
-    page_title  = models.CharField(_('Page title'), max_length=250, blank=True, null=True,
-                    help_text=_('Overwrite the title (html title tag)'))
-    menu_title  = models.CharField(_('Menu title'), max_length=250, blank=True, null=True,
-                    help_text=_('Overwrite the title in the menu'))
-    meta_desc   = models.TextField(_('Meta description'), blank=True, default='',
-                    help_text=_('The text displayed in search engines.'))
-    active      = models.BooleanField(default=False, verbose_name=_('Active'))
+    name        = models.CharField(_('name'), max_length=250)
+    slug        = models.SlugField(_('slug'), max_length=250, db_index=True, unique=False)
+    summary     = HTMLField(_('summary'), blank=True, default='')
+    description = HTMLField(_('description'), blank=True, default='')
+    page_title  = models.CharField(_('page title'), max_length=250, blank=True, null=True,
+                    help_text=_('overwrite the title (html title tag)'))
+    menu_title  = models.CharField(_('menu title'), max_length=250, blank=True, null=True,
+                    help_text=_('overwrite the title in the menu'))
+    meta_desc   = models.TextField(_('meta description'), blank=True, default='',
+                    help_text=_('the text displayed in search engines'))
+    active      = models.BooleanField(default=False, verbose_name=_('active'))
 
     class Meta:
-        verbose_name        = _('Tree node')
-        verbose_name_plural = _('Tree')
-        unique_together = [('parent', 'slug')]
+        abstract = True
 
     def __str__(self):
         return self.name
-
-    def save(self, *args, **kwargs):
-        errors = self._perform_unique_checks([(Node, ('parent', 'slug'))])
-        if errors:
-            raise ValidationError(errors)
-        super(Node, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         path = '/'.join([n.slug for n in self.get_ancestors()]+[self.slug])
@@ -83,209 +81,294 @@ class Node(MPTTModel):
     def get_menu_title(self):
         return self.menu_title or self.name
 
-tagging.register(Node)
+
+@MPTTModelBase.register
+class Node(get_mixin('node'), NodeBase):
+    class Meta:
+        ordering            = ('tree_id', 'lft')
+        unique_together     = [('parent', 'slug')]
+        verbose_name        = _('tree node')
+        verbose_name_plural = _('tree nodes')
+
+    def save(self, *args, **kwargs):
+        errors = self._perform_unique_checks([(Node, ('parent', 'slug'))])
+        if errors:
+            raise ValidationError(errors)
+        super(Node, self).save(*args, **kwargs)
 
 
 
-class Category(Node):
+class CategoryBase(Node):
+    class Meta:
+        abstract            = True
+
+
+class Category(get_mixin('category'), CategoryBase):
+    class Meta:
+        ordering            = ('tree_id', 'lft')
+        verbose_name        = _('category')
+        verbose_name_plural = _('categories')
+
+tagging.register(Category)
+
+
+
+class ProductBase(Node):
+    date_added      = models.DateTimeField(_('date added'), auto_now_add=True)
+    last_modified   = models.DateTimeField(_('last modified'), auto_now=True)
+    multiple        = models.IntegerField(_('multiple'), default=1, null=False)
+    unit            = models.CharField(_('unit'), max_length=30, blank=True, null=True)
+    price           = PriceField(_('price'))
+    tax_rate        = TaxRateField(_('tax rate'))
+    related         = models.ManyToManyField('self', _('related products'), blank=True)
 
     class Meta:
-        verbose_name        = _('Category')
-        verbose_name_plural = _('Categories')
+        abstract    = True
 
-    @staticmethod
-    def register(category_model):
-        Node.category.related.model = category_model
-        return category_model
-
-
-
-class Product(Node):
-    date_added = models.DateTimeField(auto_now_add=True,
-        verbose_name=_('Date added'))
-    last_modified = models.DateTimeField(auto_now=True,
-        verbose_name=_('Last modified'))
-    unit_price = PriceField(_('Unit price'))
-    related = models.ManyToManyField('self', _('Related products'), blank=True)
-
-    can_have_children = False
-
-    class Meta:
-        verbose_name        = _('Product')
-        verbose_name_plural = _('Products')
+    @property
+    def unit_price(self):
+        return self.price / self.multiple
 
     def get_price(self):
-        return self.unit_price
-    get_price.short_description = _('Price')
+        return Price(self.price, self.tax_rate)
+    get_price.short_description = _('price')
 
     @cached_property
-    def all_variants(self):
-        return list(self.variants.all())
+    def all_packages(self):
+        return list(self.packages.all())
 
-    @staticmethod
-    def register(product_model):
-        Node.product.related.model = product_model
-        return product_model
+
+class Product(get_mixin('product'), ProductBase):
+    class Meta:
+        ordering            = ('tree_id', 'lft')
+        verbose_name        = _('product')
+        verbose_name_plural = _('products')
+
+tagging.register(Product)
 
 
 
 @python_2_unicode_compatible
-class ProductVariant(models.Model):
-    product     = models.ForeignKey(Product, verbose_name=_('Product'), related_name='variants')
-    name        = models.CharField(_('Name'), max_length=50)
-    unit_price  = PriceField(_('Unit price'))
-    ordering    = models.PositiveIntegerField(_('Ordering'), default=1)
+class ProductPackageBase(models.Model):
+    product             = models.ForeignKey(Product,
+                            verbose_name=_('product'), related_name='packages')
+    multiple            = models.IntegerField(_('multiple'))
+    name                = models.CharField(_('name'), max_length=250, blank=True, null=True)
+    price               = PriceField(_('price'), blank=True, null=True)
+    relative_discount   = models.DecimalField(_('relative discount'), default=1,
+                            decimal_places=4, max_digits=8, blank=True, null=True)
+    nominal_discount    = PriceField(_('nominal discount'), blank=True, null=True)
 
     class Meta:
-        ordering            = ('ordering', 'name')
-        verbose_name        = _('Product variant')
-        verbose_name_plural = _('Product variants')
-
-    def __str__(self):
-        return '{} ({})'.format(self.name, currency(self.get_price()))
+        abstract    = True
 
     def get_price(self):
-        return self.unit_price or self.product.unit_price
-    get_price.short_description = _('Price')
+        if self.price:
+            return Price(self.price, self.product.tax_rate)
+        else:
+            price = self.product.unit_price * self.multiple
+            if self.relative_discount:
+                price -= (price * self.relative_discount / 100)
+            if self.nominal_discount:
+                price -= self.nominal_discount
+            return Price(price, self.product.tax_rate)
+    get_price.short_description = _('price')
+
+    def get_name(self):
+        return self.name or '{} {}'.format(
+            self.multiple,
+            self.product.unit,
+        )
+    get_name.short_description = _('name')
+
+    def __str__(self):
+        return '{}, {}'.format(self.get_name(), self.get_price())
+
+
+class ProductPackage(get_mixin('product_package'), ProductPackageBase):
+    class Meta:
+        ordering            = ('multiple',)
+        verbose_name        = _('product package')
+        verbose_name_plural = _('product packages')
 
 
 
 @python_2_unicode_compatible
-class Cart(models.Model):
-    last_updated = models.DateTimeField(auto_now=True)
+class CartBase(models.Model):
+    last_updated = models.DateTimeField(_('last updated'), auto_now=True)
 
-    class Meta(object):
-        verbose_name = _('Cart')
-        verbose_name_plural = _('Carts')
+    class Meta:
+        abstract            = True
 
     def __str__(self):
-        return ', '.join(map(unicode, self.all_items))
+        return ', '.join(map(smart_text, self.all_items))
 
     def get_absolute_url(self):
         return reverse('Cart:cart')
 
     @cached_property
     def all_items(self):
-        return list(self.items.order_by('product__name', 'variant__name'))
+        return list(self.items.order_by('product__name', 'package__multiple'))
 
     def get_price(self):
-        return sum(item.get_price() for item in self.all_items)
-    get_price.short_description = _('Price')
+        if len(self.all_items):
+            return sum(item.get_price() for item in self.all_items)
+        else:
+            return Price(0)
+    get_price.short_description = _('price')
+
+
+class Cart(get_mixin('cart'), CartBase):
+    class Meta:
+        verbose_name        = _('cart')
+        verbose_name_plural = _('carts')
 
 
 
 @python_2_unicode_compatible
-class CartItem(models.Model):
-    cart        = models.ForeignKey(Cart,           verbose_name=_('Cart'),             related_name='items')
-    product     = models.ForeignKey(Product,        verbose_name=_('Product'),          related_name='+')
-    variant     = models.ForeignKey(ProductVariant, verbose_name=_('Product variant'),  related_name='+',
+class CartItemBase(models.Model):
+    cart        = models.ForeignKey(Cart,           verbose_name=_('cart'),             related_name='items')
+    product     = models.ForeignKey(Product,        verbose_name=_('product'),          related_name='+')
+    package     = models.ForeignKey(ProductPackage, verbose_name=_('product package'),  related_name='+',
                     blank=False, null=True)
-    quantity    = models.PositiveIntegerField(_('Quantity'), default=1)
+    quantity    = models.PositiveIntegerField(_('quantity'), default=1)
+    price       = PriceField(_('price'))
+    tax_rate    = TaxRateField(_('tax rate'))
 
-    class Meta(object):
-        verbose_name = _('Cart item')
-        verbose_name_plural = _('Cart items')
-        unique_together = [('cart', 'product', 'variant')]
+    class Meta:
+        abstract            = True
 
     def __str__(self):
-        return '{}x {}{}'.format(self.quantity, self.product, self.variant and ' {}'.format(self.variant) or '')
+        return '{}x {}{}'.format(self.quantity, self.product, self.package and ' {}'.format(self.package) or '')
 
     def get_unit_price(self):
-        return self.variant \
-           and self.variant.get_price() \
-            or self.product.get_price()
+        return Price(self.price, self.tax_rate)
+    get_unit_price.short_description = _('unit price')
 
     def get_price(self):
-        return self.variant \
-           and (self.variant.get_price() * self.quantity) \
-            or (self.product.get_price() * self.quantity)
-    get_price.short_description = _('Price')
+        return Price(self.price * self.quantity, self.tax_rate)
+    get_price.short_description = _('price')
 
     def save(self):
-        if self.quantity == 0:
-            if self.id:
-                super(CartItem, self).delete()
-        else:
-            super(CartItem, self).save()
+        if self.quantity:
+            super(CartItemBase, self).save()
+        elif self.id:
+            super(CartItemBase, self).delete()
+
+
+class CartItem(get_mixin('cart_item'), CartItemBase):
+    class Meta:
+        unique_together     = [('cart', 'product', 'package')]
+        verbose_name        = _('cart item')
+        verbose_name_plural = _('cart items')
 
 
 
 @python_2_unicode_compatible
-class Shipping(models.Model):
-    name        = models.CharField(_('Name'), max_length=150)
-    description = HTMLField(_('Address'), blank=True, default='')
-    price       = PriceField(_('Price'))
-    ordering    = models.PositiveIntegerField(_('Ordering'), default=1)
+class MethodBase(models.Model):
+    code        = models.SlugField(_('code'))
+    name        = models.CharField(_('name'), max_length=150)
+    description = HTMLField(_('description'), blank=True, default='')
+    price       = PriceField(_('price'))
+    tax_rate    = TaxRateField(_('tax rate'))
+    ordering    = models.PositiveIntegerField(_('ordering'), default=1)
 
     class Meta:
-        ordering            = ('ordering', 'name')
-        verbose_name        = _('Shipping')
-        verbose_name_plural = _('Shippings')
+        abstract    = True
 
     def __str__(self):
-        return '{}, {}'.format(self.name, currency(self.get_price()))
+        return '{}, {}'.format(self.name, self.get_price())
 
     def get_price(self):
-        return self.price
+        return Price(self.price, self.tax_rate)
+
+
+class DeliveryMethod(get_mixin('delivery_method'), MethodBase):
+    class Meta:
+        ordering            = ('ordering', 'name')
+        verbose_name        = _('delivery method')
+        verbose_name_plural = _('delivery methods')
+
+
+class PaymentMethod(get_mixin('payment_method'), MethodBase):
+    class Meta:
+        ordering            = ('ordering', 'name')
+        verbose_name        = _('payment method')
+        verbose_name_plural = _('payment methods')
 
 
 
 @python_2_unicode_compatible
-class OrderState(models.Model):
-    code        = models.SlugField(_('Code'))
-    name        = models.CharField(_('Name'), max_length=150)
-    description = HTMLField(_('Description'), blank=True, default='')
+class OrderStateBase(models.Model):
+    code        = models.SlugField(_('code'))
+    name        = models.CharField(_('name'), max_length=150)
+    description = HTMLField(_('description'), blank=True, default='')
 
     class Meta:
-        verbose_name        = _('Order state')
-        verbose_name_plural = _('Order states')
+        abstract            = True
 
     def __str__(self):
         return self.name
 
 
+class OrderState(get_mixin('order_state'), OrderStateBase):
+    class Meta:
+        verbose_name        = _('order state')
+        verbose_name_plural = _('order states')
+
+
 
 @python_2_unicode_compatible
-class Order(models.Model):
-    user        = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
-                    on_delete=models.SET_NULL)
-    slug        = models.SlugField(editable=False)
-    date        = models.DateTimeField(auto_now_add=True, editable=False)
-    cart        = models.OneToOneField(Cart, verbose_name=_('Cart'), editable=False)
-    state       = models.ForeignKey(OrderState, verbose_name=_('State'))
-    first_name  = models.CharField(_('First name'), max_length=30)
-    last_name   = models.CharField(_('Last name'), max_length=30)
-    email       = models.EmailField(_('E-mail'))
-    phone       = models.CharField(_('Phone'), max_length=150, validators=[
-                    RegexValidator(r'^\+?[0-9 ]+$')])
-    address     = models.TextField(_('Address'))
-    note        = models.TextField(_('Note'), blank=True)
-    comment     = models.TextField(_('Internal comment'), blank=True)
-    shipping    = models.ForeignKey(Shipping, verbose_name=_('Shipping'))
+class OrderBase(models.Model):
+    user            = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
+                        on_delete=models.SET_NULL)
+    slug            = models.SlugField(editable=False)
+    date            = models.DateTimeField(auto_now_add=True, editable=False)
+    cart            = models.OneToOneField(Cart, verbose_name=_('cart'), editable=False)
+    state           = models.ForeignKey(OrderState, verbose_name=_('state'))
+    first_name      = models.CharField(_('first name'), max_length=30)
+    last_name       = models.CharField(_('last name'), max_length=30)
+    email           = models.EmailField(_('email'))
+    phone           = models.CharField(_('phone'), max_length=150, validators=[
+                        RegexValidator(r'^\+?[0-9 ]+$')])
+    address         = models.TextField(_('address'))
+    note            = models.TextField(_('note'), blank=True)
+    comment         = models.TextField(_('internal comment'), blank=True)
+    delivery_method = models.ForeignKey(DeliveryMethod, verbose_name=_('delivery method'))
+    payment_method  = models.ForeignKey(PaymentMethod, verbose_name=_('payment method'))
 
-    class Meta(object):
-        ordering            = ('-date',)
-        verbose_name        = _('Order')
-        verbose_name_plural = _('Orders')
+    class Meta:
+        abstract            = True
 
     def __str__(self):
         return '{} {} {}'.format(self.date, self.first_name, self.last_name)
 
-    def get_absolute_url(self):
+    def get_confirm_url(self):
         return reverse('Order:confirm', kwargs={'slug':self.slug})
 
+    def get_edit_url(self):
+        return reverse('admin:{}_{}_change'.format(self._meta.app_label, self._meta.model_name), args=(self.id,))
+
+    def get_absolute_url(self):
+        return self.user \
+           and reverse('MyOrders:detail', kwargs={'pk':self.pk}) \
+            or reverse('Order:detail', kwargs={'slug':self.slug})
+
     def get_price(self):
-        return self.cart.get_price() + self.shipping.get_price()
+        return self.cart.get_price() \
+             + self.delivery_method.get_price() \
+             + self.payment_method.get_price()
+    get_price.short_description = _('price')
 
     def save(self, *args, **kwargs):
         if self.slug:
-            super(Order, self).save(*args, **kwargs)
+            super(OrderBase, self).save(*args, **kwargs)
         else:
             tries = 10
             while True:
                 self.slug = get_rand_hash()
                 try:
-                    super(Order, self).save(*args, **kwargs)
+                    super(OrderBase, self).save(*args, **kwargs)
                     break
                 except:
                     if tries:
@@ -294,22 +377,20 @@ class Order(models.Model):
                         raise
 
 
-
-PRODUCT_TEMPLATES = getattr(settings, 'CMSPLUGIN_SHOP_PRODUCT_TEMPLATES', (
-    ('default', _('Default')),
-))
-CATEGORY_TEMPLATES = getattr(settings, 'CMSPLUGIN_SHOP_CATEGORY_TEMPLATES', (
-    ('default', _('Default')),
-))
+class Order(get_mixin('order'), OrderBase):
+    class Meta:
+        ordering            = ('-date',)
+        verbose_name        = _('order')
+        verbose_name_plural = _('orders')
 
 
 
 @python_2_unicode_compatible
 class ProductPlugin(CMSPlugin):
-    product     = models.ForeignKey(Product, verbose_name=_('Product'))
-    template    = models.CharField(_('Template'), max_length=100, choices=PRODUCT_TEMPLATES,
-                                default=PRODUCT_TEMPLATES[0][0],
-                                help_text=_('The template used to render plugin.'))
+    product     = models.ForeignKey(Product, verbose_name=_('product'))
+    template    = models.CharField(_('template'), max_length=100, choices=settings.PRODUCT_TEMPLATES,
+                                default=settings.PRODUCT_TEMPLATES[0][0],
+                                help_text=_('the template used to render plugin'))
 
     def __str__(self):
         return self.product.name
@@ -322,10 +403,10 @@ class ProductPlugin(CMSPlugin):
 
 @python_2_unicode_compatible
 class CategoryPlugin(CMSPlugin):
-    category    = models.ForeignKey(Category, verbose_name=_('Category'))
-    template    = models.CharField(_('Template'), max_length=100, choices=CATEGORY_TEMPLATES,
-                                default=CATEGORY_TEMPLATES[0][0],
-                                help_text=_('The template used to render plugin.'))
+    category    = models.ForeignKey(Category, verbose_name=_('category'))
+    template    = models.CharField(_('template'), max_length=100, choices=settings.CATEGORY_TEMPLATES,
+                                default=settings.CATEGORY_TEMPLATES[0][0],
+                                help_text=_('the template used to render plugin'))
 
     def __str__(self):
         return self.category.name

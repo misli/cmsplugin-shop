@@ -8,9 +8,14 @@ from .utils import get_view
 
 catalog     = patterns('', url(r'^(?P<path>.*)$',   get_view('catalog'),    name='catalog'))
 cart        = patterns('', url(r'^$',               get_view('cart'),       name='cart'))
-my_orders   = patterns('', url(r'^$',               get_view('my_orders'),  name='my_orders'))
+my_orders   = patterns('',
+    url(r'^$',                      get_view('my_orders'),          name='list'),
+    url(r'^(?P<pk>[^/]+)/$',        get_view('my_order_detail'),    name='detail'),
+    url(r'^(?P<pk>[^.]+).pdf$',     get_view('my_order_pdf'),       name='pdf'),
+)
 order       = patterns('',
     url('^$',                       get_view('order_form'),     name='form'),
-    url(r'^(?P<slug>[^/]+)/$',      get_view('order_confirm'),  name='confirm'),
+    url(r'^(?P<slug>[^/]+)/$',      get_view('order_detail'),   name='detail'),
     url(r'^(?P<slug>[^.]+).pdf$',   get_view('order_pdf'),      name='pdf'),
 )
+

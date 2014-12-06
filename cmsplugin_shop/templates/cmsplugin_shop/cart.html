@@ -1,5 +1,5 @@
 {% extends 'cmsplugin_shop/base.html' %}
-{% load i18n shop_tags %}
+{% load i18n %}
 
 {% block title %}{% trans 'Shopping Cart' %}{% endblock %}
 
@@ -21,18 +21,18 @@
             <td>
                 <a href="{{ f.instance.product.get_absolute_url }}">
                     {{ f.instance.product.name }}
-                    {% if f.instance.variant %}/ {{ f.instance.variant.name }}{% endif %}
+                    {% if f.instance.package %}/ {{ f.instance.package.name }}{% endif %}
                 </a>
             </td>
-            <td>{{ f.instance.get_unit_price | currency }}</td>
+            <td class="number">{{ f.instance.get_unit_price }}</td>
             <td>{{ f.quantity }}</td>
-            <td class="currency">{{ f.instance.get_price | currency }}</td>
+            <td class="number">{{ f.instance.get_price }}</td>
             <td>{{ f.DELETE }}{{ f.id }}{{ f.cart }}</td>
         </tr>
         {% endfor %}
         <tr>
             <th colspan="3">{% trans 'Total' %}</th>
-            <th class="currency">{{ request.cart.get_price | currency }}</th>
+            <th class="number">{{ request.cart.get_price }}</th>
             <th></th>
         </tr>
     </table>

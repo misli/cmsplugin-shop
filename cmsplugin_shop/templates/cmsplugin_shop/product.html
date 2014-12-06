@@ -1,11 +1,11 @@
 {% extends 'cmsplugin_shop/node.html' %}
-{% load sekizai_tags i18n shop_tags %}
+{% load sekizai_tags i18n %}
 
 {% block specific_content %}
 
 <h1 class="product_name">
     {{ product.name }}
-    <small>{{ product.get_price | currency }}</small>
+    <small>{{ product.get_price }}{% if product.unit %} / {{ product.multiple }}{{ product.unit }}{% endif %}</small>
 </h1>
 
 <div class="product_description">

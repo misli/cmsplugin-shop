@@ -1,0 +1,4 @@
+{% load i18n %}{% blocktrans with domain=site.domain url=order.get_absolute_url %}Dear customer,
+Your order has been accepted. You may check the status using following link:
+http://{{ domain }}{{ url }}
+{% endblocktrans %}

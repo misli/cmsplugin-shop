@@ -1,0 +1,4 @@
+{% load i18n %}{% blocktrans with domain=site.domain url=order.get_absolute_url %}Dear manager,
+New order has been received. You may check it using following link:
+http://{{ domain }}{{ url }}
+{% endblocktrans %}

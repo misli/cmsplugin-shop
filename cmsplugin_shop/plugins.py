@@ -3,12 +3,12 @@ from __future__ import absolute_import, division, generators, nested_scopes, pri
 from cms.plugin_base import CMSPluginBase
 from django.utils.translation import ugettext as _
 
-from .utils import get_model
+from .models import ProductPlugin, CategoryPlugin
 
 
 
 class ProductPlugin(CMSPluginBase):
-    model = get_model('ProductPlugin')
+    model = ProductPlugin
     name = _('Product')
     text_enabled = True
 
@@ -23,7 +23,7 @@ class ProductPlugin(CMSPluginBase):
 
 
 class CategoryPlugin(CMSPluginBase):
-    model = get_model('CategoryPlugin')
+    model = CategoryPlugin
     name = _('Category')
     text_enabled = True
 

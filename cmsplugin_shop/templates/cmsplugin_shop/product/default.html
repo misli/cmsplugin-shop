@@ -1,8 +1,8 @@
-{% load i18n shop_tags %}
+{% load i18n %}
 
 <h2 class="product_name">
     <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
-    <small class="product_price">{{ product.get_price | currency }}</small>
+    <small class="product_price">{{ product.get_price }}</small>
 </h2>
 
 <div class="product_description">

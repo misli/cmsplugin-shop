@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, generators, nested_scopes, pri
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin.util import get_model_from_relation
+from django.core.urlresolvers import reverse
 from django.utils.encoding import smart_text, force_text
 from django.utils.translation import ugettext_lazy as _
 from django_mptt_admin.admin import DjangoMpttAdmin
@@ -10,7 +11,8 @@ from mptt.models import TreeForeignKey
 
 from cms.utils import get_language_from_request
 
-from .utils import get_form, get_model, get_admin
+from . import models
+from .utils import get_form, get_admin
 
 
 class CategoryTreeListFilter(admin.FieldListFilter):
@@ -23,7 +25,7 @@ class CategoryTreeListFilter(admin.FieldListFilter):
         self.lookup_val_lft      = request.GET.get(self.lookup_kwarg_lft, None)
         self.lookup_val_rght     = request.GET.get(self.lookup_kwarg_rght, None)
         self.lookup_val_isnull   = request.GET.get(self.lookup_kwarg_isnull, None)
-        self.lookup_choices      = get_model('Category').objects.order_by('tree_id', 'lft')
+        self.lookup_choices      = models.Category.objects.order_by('tree_id', 'lft')
         super(CategoryTreeListFilter, self).__init__(
             field, request, params, model, model_admin, field_path
         )
@@ -84,9 +86,11 @@ class CategoryTreeListFilter(admin.FieldListFilter):
 
 
 class CategoryAdmin(admin.ModelAdmin):
+    form            = get_form('Category')
     ordering        = ['tree_id', 'lft']
-    list_display    = ['name', 'parent']
+    list_display    = ['name', 'parent', 'active']
     list_filter     = [('parent', CategoryTreeListFilter)]
+    search_fields   = ['name', 'summary', 'description']
     prepopulated_fields = {'slug': ('name',)}
     trigger_save_after_move = True
 
@@ -96,16 +100,18 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 
-class ProductVariantInlineAdmin(admin.TabularInline):
-    model = get_model('ProductVariant')
+class ProductPackageInlineAdmin(admin.TabularInline):
+    model = models.ProductPackage
     extra = 0
 
 class ProductAdmin(admin.ModelAdmin):
     form            = get_form('Product')
     ordering        = ['tree_id', 'lft']
-    list_display    = ['name', 'parent', 'active']
+    list_display    = ['name', 'parent', 'active', 'multiple', 'unit', 'price', 'tax_rate']
+    list_editable   = ['active', 'multiple', 'unit', 'price', 'tax_rate']
     list_filter     = ['active', ('parent', CategoryTreeListFilter)]
-    inlines         = [ProductVariantInlineAdmin]
+    search_fields   = ['name', 'summary', 'description']
+    inlines         = [ProductPackageInlineAdmin]
     filter_horizontal   = ['related']
     prepopulated_fields = {'slug': ('name',)}
 
@@ -127,14 +133,41 @@ class OrderStateAdmin(admin.ModelAdmin):
 
 
 
+class CartItemInlineAdmin(admin.TabularInline):
+    model = models.CartItem
+    extra = 0
+
+class CartAdmin(admin.ModelAdmin):
+    ordering        = ['-last_updated']
+    inlines         = [CartItemInlineAdmin]
+    readonly_fields = ['last_updated', 'get_price']
+
+
+
 class OrderAdmin(admin.ModelAdmin):
-    readonly_fields = ['cart']
+    readonly_fields = ['slug', 'cart_link']
     list_filter     = ['state']
-    list_display    = ['date', 'first_name', 'last_name', 'email', 'phone', 'address', 'shipping', 'state', 'get_price', 'cart']
+    list_display    = ['id', 'date', 'first_name', 'last_name', 'email',
+                       'phone', 'address', 'delivery_method', 'payment_method',
+                       'state', 'get_price', 'cart_link']
+    search_fields   = ['first_name', 'last_name', 'email', 'phone', 'address']
+
+    def cart_link(self, order):
+        return '<a href="{}">{}</a>'.format(
+            reverse('admin:cmsplugin_shop_cart_change', args=(order.cart_id,)),
+            order.cart,
+        )
+    cart_link.short_description = _('cart')
+    cart_link.allow_tags = True
 
 
 
-class ShippingAdmin(admin.ModelAdmin):
+class DeliveryMethodAdmin(admin.ModelAdmin):
+    pass
+
+
+
+class PaymentMethodAdmin(admin.ModelAdmin):
     pass
 
 

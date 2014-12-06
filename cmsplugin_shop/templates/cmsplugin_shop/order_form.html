@@ -1,19 +1,24 @@
 {% extends 'cmsplugin_shop/base.html' %}
-{% load i18n shop_tags %}
+{% load i18n %}
 
 {% block title %}{% trans 'Order' %}{% endblock %}
 {% block extrahead %}{{ wizard.form.media }}{% endblock %}
 
 {% block content %}
 
-<h1>{% trans 'Order' %}</h1>
+<h1>
+    {% if wizard.steps.step1 == 1 %}
+        {% trans 'Order' %}
+    {% else %}
+        {% trans 'Order Summary' %}
+    {% endif %}
+    <small>{% blocktrans with step=wizard.steps.step1 count=wizard.steps.count %}step {{ step }} of {{ count }}{% endblocktrans %}</small>
+</h1>
 
-<p>{% blocktrans with step=wizard.steps.step1 count=wizard.steps.count %}Step {{ step }} of {{ count }}{% endblocktrans %}</p>
-
-{% include 'cmsplugin_shop/order_confirm_cart.html' with cart=request.cart %}
 
 {% if wizard.steps.step0 %}
-{% include 'cmsplugin_shop/order_confirm_details.html' %}
+{% include 'cmsplugin_shop/order_cart.html' with cart=request.cart %}
+{% include 'cmsplugin_shop/order_details.html' %}
 {% endif %}
 
 <form method="post">{% csrf_token %}

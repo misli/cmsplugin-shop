@@ -3,17 +3,18 @@ from __future__ import absolute_import, division, generators, nested_scopes, pri
 import cStringIO
 
 from cms.views import details as cms_page
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.formtools.wizard.views import SessionWizardView
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
-from django.core.mail import mail_managers
+from django.core.mail import send_mass_mail
 from django.core.urlresolvers import reverse
 from django.forms import ModelForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
+from django.template import RequestContext
+from django.template.loader import get_template
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import (
@@ -23,8 +24,8 @@ from django.views.generic import (
 from os.path import basename
 from xhtml2pdf import pisa
 
-from .models import Node
-from .utils import get_model, get_view, get_form
+from . import models, settings
+from .utils import get_view, get_form
 
 
 
@@ -68,17 +69,22 @@ class ProductView(FormView):
         return kwargs
 
     def form_valid(self, form):
+        self.request.save_cart()
         form.instance.cart      = self.request.cart
         form.instance.product   = self.kwargs['product']
         try:
             item = form.instance.__class__.objects.get(
                 cart    = form.instance.cart,
                 product = form.instance.product,
-                variant = form.instance.variant,
+                package = form.instance.package,
             )
             item.quantity += form.instance.quantity
             item.save()
         except form.instance.__class__.DoesNotExist:
+            form.instance.tax_rate = form.instance.product.tax_rate
+            form.instance.price = form.instance.package \
+                                and form.instance.package.price \
+                                 or form.instance.product.price
             form.instance.save()
         messages.add_message(self.request, messages.INFO,
             mark_safe(_('Product has been added to <a href="{}">shopping cart</a>').format(reverse('Cart:cart')))
@@ -105,8 +111,8 @@ class CatalogView(View):
     category_view   = staticmethod(get_view('category'))
     product_view    = staticmethod(get_view('product'))
 
-    category_model  = get_model('Category')
-    product_model   = get_model('Product')
+    category_model  = models.Category
+    product_model   = models.Product
 
     def dispatch(self, request, path):
         slug_list = [slug for slug in path.split('/') if slug]
@@ -131,13 +137,12 @@ class CatalogView(View):
         # lookup node by path
         node = None
         for slug in slug_list:
-            node = get_object_or_404(Node, parent=node, slug=slug, **active)
+            node = get_object_or_404(models.Node, parent=node, slug=slug, **active)
 
         # display product view
         try:
             product = node.product
             return self.product_view(request,
-                count_in_cart   = sum([ i.quantity for i in request.cart.all_items if i.product == product ]),
                 node            = product,
                 product         = product,
             )
@@ -157,7 +162,7 @@ catalog = CatalogView.as_view()
 
 class CartView(UpdateView):
     form_class      = get_form('Cart')
-    model           = get_model('Cart')
+    model           = models.Cart
     template_name   = 'cmsplugin_shop/cart.html'
 
     def get_object(self, queryset=None):
@@ -174,19 +179,11 @@ cart = CartView.as_view()
 
 
 class OrderFormView(SessionWizardView):
-    order_model         = get_model('Order')
-    order_state_model   = get_model('OrderState')
     template_name       = 'cmsplugin_shop/order_form.html'
     form_list           = [
         get_form('Order'),
         get_form('OrderConfirm')
     ]
-    initial_state_code = getattr(
-        settings, 'CMSPLUGIN_SHOP_INITIAL_ORDER_STATE', 'new'
-    )
-    profile_attr = getattr(
-        settings, 'AUTH_USER_PROFILE_ATTRIBUTE', 'profile'
-    )
 
     def get_form_initial(self, step):
         initial = {}
@@ -194,8 +191,8 @@ class OrderFormView(SessionWizardView):
             for attr in 'first_name', 'last_name', 'email':
                 if hasattr(self.request.user, attr):
                     initial[attr] = getattr(self.request.user, attr)
-            if hasattr(self.request.user, self.profile_attr):
-                profile = getattr(self.request.user, self.profile_attr)
+            if hasattr(self.request.user, settings.PROFILE_ATTRIBUTE):
+                profile = getattr(self.request.user, settings.PROFILE_ATTRIBUTE)
                 for attr in 'phone', 'address':
                     if hasattr(profile, attr):
                         initial[attr] = getattr(profile, attr)
@@ -203,18 +200,21 @@ class OrderFormView(SessionWizardView):
 
     def get_order(self):
         # create order using data from first form
-        order = self.order_model(**self.get_cleaned_data_for_step('0'))
+        order = models.Order()
+        for attr, value in self.get_cleaned_data_for_step('0').items():
+            setattr(order, attr, value)
 
         # find get initial order_state
         try:
-            state = self.order_state_model.objects.get(code=self.initial_state_code)
-        except self.order_state_model.DoesNotExist:
-            state = self.order_state_model(code=self.initial_state_code, name='New')
+            state = models.OrderState.objects.get(code=settings.INITIAL_ORDER_STATE)
+        except models.OrderState.DoesNotExist:
+            state = models.OrderState(code=settings.INITIAL_ORDER_STATE, name='New')
             state.save()
 
         # set order.state and cart
-        order.state = state
+        self.request.save_cart()
         order.cart  = self.request.cart
+        order.state = state
         if self.request.user.is_authenticated():
             order.user = self.request.user
         return order
@@ -232,46 +232,68 @@ class OrderFormView(SessionWizardView):
         # save order
         order.save()
 
-        # confirm url
-        confirm_url = reverse('Order:confirm', kwargs={'slug':order.slug})
+        # context
+        context = RequestContext(self.request, {
+            'site':  Site.objects.get_current(),
+            'order': order,
+        })
 
-        # site
-        site = Site.objects.get_current()
-
-        # send mail
-        mail_managers(
-            _('New Order'),
-            _('New order has been submitted in Your e-shop.\n{}').format(
-                'https://{}{}'.format(site.domain, confirm_url)
-            ),
+        send_mass_mail(((
+                _('Order accepted'),
+                get_template('cmsplugin_shop/order_customer_mail.txt').render(context),
+                settings.SHOP_EMAIL,
+                [order.email]
+            ), (
+                _('New order received'),
+                get_template('cmsplugin_shop/order_manager_mail.txt').render(context),
+                settings.SHOP_EMAIL,
+                map(lambda m: u'"{}" <{}>'.format(m[0], m[1]), settings.settings.MANAGERS),
+            )),
+            **settings.SEND_MAIL_KWARGS
         )
 
+        messages.add_message(self.request, messages.INFO, mark_safe(_(
+            'Your order has been accepted. The confirmation email has been sent to {}.'
+        ).format(order.email)))
+
         # redirect to order detail
-        return HttpResponseRedirect(confirm_url)
+        return HttpResponseRedirect(order.get_absolute_url())
 
 order_form = OrderFormView.as_view()
 
 
 
-class OrderConfirmView(DetailView):
-    model = get_model('Order')
-    template_name_suffix = '_confirm'
+class OrderDetailView(DetailView):
+    model = models.Order
 
-order_confirm = OrderConfirmView.as_view()
+    def get_queryset(self):
+        return super(OrderDetailView, self).get_queryset().filter(user = None)
 
 
+class MyOrderDetailView(DetailView):
+    model = models.Order
 
-class OrderPdfView(PdfViewMixin, DetailView):
-    model = get_model('Order')
+    def get_queryset(self):
+        return super(MyOrderDetailView, self).get_queryset().filter(user = self.request.user)
+
+
+class OrderPdfView(PdfViewMixin, OrderDetailView):
     template_name_suffix = '_pdf'
 
-order_pdf = OrderPdfView.as_view()
+
+class MyOrderPdfView(PdfViewMixin, MyOrderDetailView):
+    template_name_suffix = '_pdf'
+
+
+order_detail    = OrderDetailView.as_view()
+order_pdf       = OrderPdfView.as_view()
+my_order_detail = login_required(MyOrderDetailView.as_view())
+my_order_pdf    = login_required(MyOrderPdfView.as_view())
 
 
 
 class MyOrdersView(ListView):
-    model = get_model('Order')
-    template_name = 'cmsplugin_shop/my_orders.html'
+    model = models.Order
 
     def get_queryset(self):
         user = self.request.user

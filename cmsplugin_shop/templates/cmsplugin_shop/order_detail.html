@@ -1,0 +1,20 @@
+{% extends 'cmsplugin_shop/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Order' %}{% endblock %}
+
+{% block content %}
+
+<h1>{% trans 'Order' %}</h1>
+
+<table class="table order-status">
+    <tr><th>{% trans 'State of the order' %}</td>   <td>{{ order.state }}</td></tr>
+    <tr><th>{% trans 'Order total' %}</th>          <td>{{ order.get_price }}</td></tr>
+    <tr><th>{% trans 'Date of receipt' %}</td>      <td>{{ order.date }}</td></tr>
+</table>
+
+{% include 'cmsplugin_shop/order_details.html' %}
+
+{% include 'cmsplugin_shop/order_cart.html' with cart=order.cart %}
+
+{% endblock %}

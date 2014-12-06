@@ -1,7 +1,10 @@
 *.pyc
 *.pyo
+*.egg-info
 .ipython
 .project
 .pydevproject
 .settings
+build
+dist
 *~

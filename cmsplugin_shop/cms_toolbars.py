@@ -4,10 +4,7 @@ from cms.toolbar_base import CMSToolbar
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
-from .utils import get_model
-
-Product  = get_model('Product')
-Category = get_model('Category')
+from .models import Category, Product
 
 class ShopToolbar(CMSToolbar):
     def populate(self):

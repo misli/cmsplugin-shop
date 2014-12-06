@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 0.1\n"
+"Project-Id-Version: 0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-12-04 00:44+0100\n"
+"POT-Creation-Date: 2014-12-07 01:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Jakub Dorňák <jakub.dornak@misli.cz>\n"
 "Language: Czech\n"
@@ -16,20 +16,26 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: admins.py:59
+#: admins.py:61
 msgid "All"
 msgstr "Všechny"
+
+#: admins.py:160 models.py:223 models.py:230 models.py:327
+msgid "cart"
+msgstr "košík"
 
 #: cms_app.py:14 cms_menus.py:13
 msgid "Catalog"
 msgstr "Katalog"
 
-#: cms_app.py:21 models.py:158 models.py:179 models.py:254
+#: cms_app.py:21
 msgid "Cart"
 msgstr "Košík"
 
-#: cms_app.py:28 models.py:268 templates/cmsplugin_shop/order_form.html:4
-#: templates/cmsplugin_shop/order_form.html:9
+#: cms_app.py:28 templates/cmsplugin_shop/order_detail.html:4
+#: templates/cmsplugin_shop/order_detail.html:8
+#: templates/cmsplugin_shop/order_form.html:4
+#: templates/cmsplugin_shop/order_form.html:11
 #: templates/cmsplugin_shop/order_pdf.html:6
 #: templates/cmsplugin_shop/order_pdf.html:15
 msgid "Order"
@@ -39,15 +45,15 @@ msgstr "Objednávka"
 msgid "My orders"
 msgstr "Moje objednávky"
 
-#: cms_toolbars.py:14
+#: cms_toolbars.py:11
 msgid "Shop"
 msgstr "Obchod"
 
-#: cms_toolbars.py:15
+#: cms_toolbars.py:12
 msgid "Add product"
 msgstr "Přidat produkt"
 
-#: cms_toolbars.py:16
+#: cms_toolbars.py:13
 msgid "Add category"
 msgstr "Přidat kategorii"
 
@@ -56,236 +62,278 @@ msgid ""
 "Enter space separated list of single word tags or comma separated list of "
 "tags containing spaces. Use doublequotes to enter name containing comma."
 msgstr ""
-"Vložte seznam jednoslovných tagů oddělených mezerou, nebo výceslovné tagy "
-"oddělené čárkou."
+"Seznam jednoslovných tagů oddělených mezerou nebo vícelovných tagů "
+"oddělených čárkou. Pro vložení tagů obsahujících čárku je možné použít "
+"uvozovky."
 
-#: forms.py:75
+#: forms.py:77
 msgid "I agree with terms and conditions"
 msgstr "Souhlasím s obchodními podmínkami"
 
-#: models.py:42 models.py:93 models.py:325 plugins.py:27
-msgid "Category"
-msgstr "Kategorie"
+#: models.py:48 models.py:109 models.py:406
+msgid "category"
+msgstr "kategorie"
 
-#: models.py:44 models.py:135 models.py:215 models.py:236
-msgid "Name"
-msgstr "Jméno"
-
-#: models.py:45
-msgid "Slug"
-msgstr "Identifikátor"
-
-#: models.py:46
-msgid "Summary"
-msgstr "Shrnutí"
-
-#: models.py:47 models.py:237
-msgid "Description"
-msgstr "Popis"
-
-#: models.py:48
-msgid "Page title"
-msgstr "Titulek stránky"
-
-#: models.py:49
-msgid "Overwrite the title (html title tag)"
-msgstr "Přepíše titulek stránky (html tag title)"
-
-#: models.py:50
-msgid "Menu title"
-msgstr "Titulek v menu"
+#: models.py:50 models.py:156 models.py:182 models.py:270 models.py:304
+msgid "name"
+msgstr "název"
 
 #: models.py:51
-msgid "Overwrite the title in the menu"
-msgstr "Přepíše titulek v menu"
+msgid "slug"
+msgstr ""
 
 #: models.py:52
-msgid "Meta description"
-msgstr "Popis stránky"
+msgid "summary"
+msgstr "shrnutí"
 
-#: models.py:53
-msgid "The text displayed in search engines."
-msgstr "Text zobrazený ve vyhledávačích"
+#: models.py:53 models.py:271 models.py:305
+msgid "description"
+msgstr "popis"
 
 #: models.py:54
-msgid "Active"
-msgstr "Aktivní"
+msgid "page title"
+msgstr "titulek stránky"
+
+#: models.py:55
+msgid "overwrite the title (html title tag)"
+msgstr "přepíše titulek stránky (html tag title)"
+
+#: models.py:56
+msgid "menu title"
+msgstr "titulek v menu"
 
 #: models.py:57
-msgid "Tree node"
-msgstr "Položka stromu"
+msgid "overwrite the title in the menu"
+msgstr "přepíše titulek v menu"
 
 #: models.py:58
-msgid "Tree"
-msgstr "Strom"
+msgid "meta description"
+msgstr "popis stránky (v HTML)"
 
-#: models.py:94 templates/cmsplugin_shop/list_categories.html:5
-msgid "Categories"
-msgstr "Kategorie"
+#: models.py:59
+msgid "the text displayed in search engines"
+msgstr "text zobrazený ve vyhledávačích"
 
-#: models.py:105
-msgid "Date added"
-msgstr "Datum zadání"
+#: models.py:60
+msgid "active"
+msgstr "aktivní"
 
-#: models.py:107
-msgid "Last modified"
-msgstr "Naposled upraveno"
+#: models.py:90
+msgid "tree node"
+msgstr "položka stromu"
 
-#: models.py:108 models.py:136 templates/cmsplugin_shop/cart.html:14
-#: templates/cmsplugin_shop/order_confirm_cart.html:6
-#: templates/cmsplugin_shop/order_pdf.html:19
-msgid "Unit price"
-msgstr "Jednotková cena"
+#: models.py:91
+msgid "tree nodes"
+msgstr "položky stromu"
 
-#: models.py:109
-msgid "Related products"
-msgstr "Příbuzné produkty"
+#: models.py:110
+msgid "categories"
+msgstr "kategorie"
 
-#: models.py:114 models.py:134 models.py:180 models.py:309 plugins.py:12
-#: templates/cmsplugin_shop/cart.html:13
-#: templates/cmsplugin_shop/order_confirm_cart.html:5
+#: models.py:117
+msgid "date added"
+msgstr "datum zadání"
+
+#: models.py:118
+msgid "last modified"
+msgstr "naposled upraveno"
+
+#: models.py:119 models.py:155
+msgid "multiple"
+msgstr "násobek"
+
+#: models.py:120
+msgid "unit"
+msgstr "jednotka"
+
+#: models.py:121 models.py:134 models.py:157 models.py:175 models.py:218
+#: models.py:235 models.py:250 models.py:272 models.py:361
+msgid "price"
+msgstr "cena"
+
+#: models.py:122 models.py:236 models.py:273
+msgid "tax rate"
+msgstr "sazba daně"
+
+#: models.py:123
+msgid "related products"
+msgstr "příbuzné produkty"
+
+#: models.py:144 models.py:154 models.py:231 models.py:390
+msgid "product"
+msgstr "produkt"
+
+#: models.py:145
+msgid "products"
+msgstr "produkty"
+
+#: models.py:158
+msgid "relative discount"
+msgstr "relativní sleva"
+
+#: models.py:160
+msgid "nominal discount"
+msgstr "nominální sleva"
+
+#: models.py:191 models.py:232
+msgid "product package"
+msgstr "balení"
+
+#: models.py:192
+msgid "product packages"
+msgstr "balení"
+
+#: models.py:198
+msgid "last updated"
+msgstr "datum poslední změny"
+
+#: models.py:224
+msgid "carts"
+msgstr "košíky"
+
+#: models.py:234
+msgid "quantity"
+msgstr "množství"
+
+#: models.py:246
+msgid "unit price"
+msgstr "jednotková cena"
+
+#: models.py:262
+msgid "cart item"
+msgstr "položka košíku"
+
+#: models.py:263
+msgid "cart items"
+msgstr "položky košíku"
+
+#: models.py:269 models.py:303
+msgid "code"
+msgstr "kód"
+
+#: models.py:274
+msgid "ordering"
+msgstr "řazení"
+
+#: models.py:289 models.py:337
+msgid "delivery method"
+msgstr "způsob doručení"
+
+#: models.py:290
+msgid "delivery methods"
+msgstr "způsoby doručení"
+
+#: models.py:296 models.py:338
+msgid "payment method"
+msgstr "způsob placení"
+
+#: models.py:297
+msgid "payment methods"
+msgstr "způsoby placení"
+
+#: models.py:316
+msgid "order state"
+msgstr "stav objednávky"
+
+#: models.py:317
+msgid "order states"
+msgstr "stavy objednávek"
+
+#: models.py:328
+msgid "state"
+msgstr "stav"
+
+#: models.py:329
+msgid "first name"
+msgstr "křestní jméno"
+
+#: models.py:330
+msgid "last name"
+msgstr "příjmení"
+
+#: models.py:331
+msgid "email"
+msgstr "e-mail"
+
+#: models.py:332
+msgid "phone"
+msgstr "telefon"
+
+#: models.py:334
+msgid "address"
+msgstr "adresa"
+
+#: models.py:335
+msgid "note"
+msgstr "poznámka"
+
+#: models.py:336
+msgid "internal comment"
+msgstr "interní komentář"
+
+#: models.py:383
+msgid "order"
+msgstr "objednávka"
+
+#: models.py:384
+msgid "orders"
+msgstr "objednávky"
+
+#: models.py:391 models.py:407
+msgid "template"
+msgstr "šablona"
+
+#: models.py:393 models.py:409
+msgid "the template used to render plugin"
+msgstr "šablona použitá pro zobrazení položky obsahu."
+
+#: plugins.py:12 templates/cmsplugin_shop/cart.html:13
+#: templates/cmsplugin_shop/order_cart.html:5
 #: templates/cmsplugin_shop/order_pdf.html:18
 msgid "Product"
 msgstr "Produkt"
 
-#: models.py:115 templates/cmsplugin_shop/list_products.html:5
-msgid "Products"
-msgstr "Produkty"
+#: plugins.py:27
+msgid "Category"
+msgstr "kategorie"
 
-#: models.py:119 models.py:149 models.py:173 models.py:202 models.py:217
-#: templates/cmsplugin_shop/cart.html:16
-#: templates/cmsplugin_shop/order_confirm_cart.html:8
-#: templates/cmsplugin_shop/order_pdf.html:21
-msgid "Price"
-msgstr "Cena"
+#: settings.py:19
+msgid "no tax"
+msgstr "žádná daň"
 
-#: models.py:137 models.py:218
-msgid "Ordering"
-msgstr "Řazení"
-
-#: models.py:141 models.py:181
-msgid "Product variant"
-msgstr "Varianta produktu"
-
-#: models.py:142
-msgid "Product variants"
-msgstr "Varianty produktů"
-
-#: models.py:159
-msgid "Carts"
-msgstr "Košíky"
-
-#: models.py:183 templates/cmsplugin_shop/cart.html:15
-#: templates/cmsplugin_shop/order_confirm_cart.html:7
-#: templates/cmsplugin_shop/order_pdf.html:20
-msgid "Quantity"
-msgstr "Množství"
-
-#: models.py:186
-msgid "Cart item"
-msgstr "Položka košíku"
-
-#: models.py:187
-msgid "Cart items"
-msgstr "Položky košíku"
-
-#: models.py:216 models.py:261
-#: templates/cmsplugin_shop/order_confirm_details.html:13
-msgid "Address"
-msgstr "Adresa"
-
-#: models.py:222 models.py:264
-#: templates/cmsplugin_shop/order_confirm_details.html:17
-msgid "Shipping"
-msgstr "Doručování"
-
-#: models.py:223
-msgid "Shippings"
-msgstr "Doručování"
-
-#: models.py:235
-msgid "Code"
-msgstr "Kód"
-
-#: models.py:240
-msgid "Order state"
-msgstr "Stav objednávky"
-
-#: models.py:241
-msgid "Order states"
-msgstr "Stavy objednávek"
-
-#: models.py:255
-msgid "State"
-msgstr "Stav"
-
-#: models.py:256 templates/cmsplugin_shop/order_confirm_details.html:5
-msgid "First name"
-msgstr "Křestní jméno"
-
-#: models.py:257 templates/cmsplugin_shop/order_confirm_details.html:6
-msgid "Last name"
-msgstr "Příjmení"
-
-#: models.py:258
-msgid "E-mail"
-msgstr "E-mail"
-
-#: models.py:259 templates/cmsplugin_shop/order_confirm_details.html:9
-msgid "Phone"
-msgstr "Telefon"
-
-#: models.py:262 templates/cmsplugin_shop/order_confirm_details.html:14
-msgid "Note"
-msgstr "Poznámka"
-
-#: models.py:263
-msgid "Internal comment"
-msgstr "Interní komentář"
-
-#: models.py:269
-msgid "Orders"
-msgstr "Objednávky"
-
-#: models.py:299 models.py:302
-msgid "Default"
-msgstr "Výchozí"
-
-#: models.py:310 models.py:326
-msgid "Template"
-msgstr "Šablona "
-
-#: models.py:312 models.py:328
-msgid "The template used to render plugin."
-msgstr "Šablona použitá pro zobrazení položky obsahu."
-
-#: views.py:84
-msgid "Product has been added to <a href=\"{}\">shopping cart</a>"
-msgstr "Produkt byl přidán do <a href=\"{}\">nákupního košíku</a>"
-
-#: views.py:243
-msgid "New Order"
-msgstr "Nová objednávka"
-
-#: views.py:244
-msgid ""
-"New order has been submitted in Your e-shop.\n"
-"{}"
-msgstr ""
-"Máte novou objednávku. Zobrazíte ji kliknutím na tento odkaz:\n"
-"{}"
+#: settings.py:24 settings.py:25
+msgid "default"
+msgstr "výchozí"
 
 #: templates/cmsplugin_shop/cart.html:4 templates/cmsplugin_shop/cart.html:8
 msgid "Shopping Cart"
 msgstr "Nákupní košík"
+
+#: templates/cmsplugin_shop/cart.html:14
+#: templates/cmsplugin_shop/order_cart.html:6
+#: templates/cmsplugin_shop/order_pdf.html:19
+msgid "Unit price"
+msgstr "Jednotková cena"
+
+#: templates/cmsplugin_shop/cart.html:15
+#: templates/cmsplugin_shop/order_cart.html:7
+#: templates/cmsplugin_shop/order_pdf.html:20
+msgid "Quantity"
+msgstr "Množství"
+
+#: templates/cmsplugin_shop/cart.html:16
+#: templates/cmsplugin_shop/order_cart.html:8
+#: templates/cmsplugin_shop/order_pdf.html:21
+msgid "Price"
+msgstr "Cena"
 
 #: templates/cmsplugin_shop/cart.html:17
 msgid "Delete"
 msgstr "Smazat"
 
 #: templates/cmsplugin_shop/cart.html:34
-#: templates/cmsplugin_shop/order_confirm_cart.html:24
-#: templates/cmsplugin_shop/order_pdf.html:45
+#: templates/cmsplugin_shop/order_cart.html:37
+#: templates/cmsplugin_shop/order_pdf.html:53
 msgid "Total"
 msgstr "Celkem"
 
@@ -297,39 +345,99 @@ msgstr "Aktualizovat nákupní košík"
 msgid "Update and continue to order"
 msgstr "Aktualizovat a objednat"
 
-#: templates/cmsplugin_shop/order_confirm.html:4
-#: templates/cmsplugin_shop/order_confirm.html:8
-msgid "Order accepted"
-msgstr "Objednávka přijata"
+#: templates/cmsplugin_shop/list_categories.html:5
+msgid "Categories"
+msgstr "Kategorie"
 
-#: templates/cmsplugin_shop/order_confirm_details.html:10
-msgid "Email"
-msgstr "E-mail"
+#: templates/cmsplugin_shop/list_products.html:5
+msgid "Products"
+msgstr "Produkty"
 
-#: templates/cmsplugin_shop/order_confirm_details.html:18
-msgid "Payment"
-msgstr "Způsob placení"
+#: templates/cmsplugin_shop/order_cart.html:24
+msgid "Subtotal"
+msgstr "Mezioučet"
 
-#: templates/cmsplugin_shop/order_confirm_details.html:21
+#: templates/cmsplugin_shop/order_customer_mail.txt:1
+#, python-format
+msgid ""
+"Dear customer,\n"
+"Your order has been accepted. You may check the status using following "
+"link:\n"
+"http://%(domain)s%(url)s\n"
+msgstr ""
+"Vážený zákazníku,\n"
+"Vaše objednávka byla přijata. Stav objednávky můžete ověřit kliknutím na "
+"tento odkaz:\n"
+"http://%(domain)s%(url)s\n"
+
+#: templates/cmsplugin_shop/order_detail.html:11
+msgid "State of the order"
+msgstr "Stav objednávky"
+
+#: templates/cmsplugin_shop/order_detail.html:12
 msgid "Order total"
 msgstr "Cena celkem"
 
-#: templates/cmsplugin_shop/order_form.html:11
-#, python-format
-msgid "Step %(step)s of %(count)s"
-msgstr "Krok %(step)s z %(count)s"
+#: templates/cmsplugin_shop/order_detail.html:13
+msgid "Date of receipt"
+msgstr "Datum přijetí"
 
-#: templates/cmsplugin_shop/order_form.html:32
+#: templates/cmsplugin_shop/order_details.html:5
+msgid "First name"
+msgstr "Křestní jméno"
+
+#: templates/cmsplugin_shop/order_details.html:6
+msgid "Last name"
+msgstr "Příjmení"
+
+#: templates/cmsplugin_shop/order_details.html:9
+msgid "Phone"
+msgstr "Telefon"
+
+#: templates/cmsplugin_shop/order_details.html:10
+msgid "Email"
+msgstr "E-mail"
+
+#: templates/cmsplugin_shop/order_details.html:13
+msgid "Address"
+msgstr "Adresa"
+
+#: templates/cmsplugin_shop/order_details.html:14
+msgid "Note"
+msgstr "Poznámka"
+
+#: templates/cmsplugin_shop/order_form.html:13
+msgid "Order Summary"
+msgstr "Shrnutí objednávky"
+
+#: templates/cmsplugin_shop/order_form.html:15
+#, python-format
+msgid "step %(step)s of %(count)s"
+msgstr "krok %(step)s z %(count)s"
+
+#: templates/cmsplugin_shop/order_form.html:37
 msgid "Back"
 msgstr "Zpět"
 
-#: templates/cmsplugin_shop/order_form.html:35
+#: templates/cmsplugin_shop/order_form.html:40
 msgid "Continue"
 msgstr "Pokračovat"
 
-#: templates/cmsplugin_shop/order_form.html:37
+#: templates/cmsplugin_shop/order_form.html:42
 msgid "Submit order"
 msgstr "Odeslat objednávku"
+
+#: templates/cmsplugin_shop/order_manager_mail.txt:1
+#, python-format
+msgid ""
+"Dear manager,\n"
+"New order has been received. You may check it using following link:\n"
+"http://%(domain)s%(url)s\n"
+msgstr ""
+"Vážený manažere,\n"
+"nová objednávka byla přijata. Zobrazit ji můžete kliknutím na následující "
+"odkaz:\n"
+"http://%(domain)s%(url)s\n"
 
 #: templates/cmsplugin_shop/product.html:17
 msgid "Add to cart"
@@ -338,3 +446,20 @@ msgstr "Přidat do košíku"
 #: templates/cmsplugin_shop/product.html:18
 msgid "Add and show the cart"
 msgstr "Přidat a zobrazit košík"
+
+#: views.py:90
+msgid "Product has been added to <a href=\"{}\">shopping cart</a>"
+msgstr "Produkt byl přidán do <a href=\"{}\">nákupního košíku</a>"
+
+#: views.py:242
+msgid "Order accepted"
+msgstr "Objednávka přijata"
+
+#: views.py:247
+msgid "New order received"
+msgstr "Nová objednávka doručena"
+
+#: views.py:256
+msgid ""
+"Your order has been accepted. The confirmation email has been sent to {}."
+msgstr "Vaše objednávka byla přijata. Potvrzovací email byl odeslán na {}."

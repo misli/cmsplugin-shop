@@ -1,0 +1,42 @@
+{% load i18n %}
+
+<table class="table order-cart">
+    <tr>
+        <th>{% trans 'Product' %}</th>
+        <th>{% trans 'Unit price' %}</th>
+        <th>{% trans 'Quantity' %}</th>
+        <th>{% trans 'Price' %}</th>
+    </tr>
+    {% for item in cart.all_items %}
+    <tr>
+        <td>
+            <a href="{{ item.product.get_absolute_url }}">
+                {{ item.product.name }}
+                {% if item.package %}/ {{ item.package.name }}{% endif %}
+            </a>
+        </td>
+        <td class="number">{{ item.get_unit_price }}</td>
+        <td class="number">{{ item.quantity }}</td>
+        <td class="number">{{ item.get_price }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <th colspan="3">{% trans 'Subtotal' %}</th>
+        <th class="number">{{ cart.get_price }}</th>
+    </tr>
+    {% if order %}
+    <tr>
+        <td colspan="3">{{ order.delivery_method.name }}</td>
+        <td class="number">{{ order.delivery_method.get_price }}</td>
+    </tr>
+    <tr>
+        <td colspan="3">{{ order.payment_method.name }}</td>
+        <td class="number">{{ order.payment_method.get_price }}</td>
+    </tr>
+    <tr>
+        <th colspan="3">{% trans 'Total' %}</th>
+        <th class="number">{{ order.get_price }}</th>
+    </tr>
+    {% endif %}
+</table>
+

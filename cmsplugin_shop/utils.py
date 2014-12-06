@@ -3,9 +3,12 @@ from __future__ import absolute_import, division, generators, nested_scopes, pri
 import locale
 import os
 import string
-from django.conf import settings
+from decimal import Decimal
+from django.db.models import Model
 from django.utils.encoding import smart_text
 from django.utils.translation import get_language
+
+from . import settings
 
 try:
     from django.utils.module_loading import import_string
@@ -13,52 +16,54 @@ except ImportError:
     from django.utils.module_loading import import_by_path as import_string
 
 
+class EmptyMixin(Model):
+    class Meta:
+        abstract = True
 
 def get_admin(name):
-    return import_string(getattr(settings,
+    return import_string(getattr(settings.settings,
         'CMSPLUGIN_SHOP_{}_ADMIN'.format(name.upper()),
         'cmsplugin_shop.admins.{}Admin'.format(name),
     ))
 
 def get_form(name):
-    return import_string(getattr(settings,
+    return import_string(getattr(settings.settings,
         'CMSPLUGIN_SHOP_{}_FORM'.format(name.upper()),
         'cmsplugin_shop.forms.{}Form'.format(name),
     ))
 
 def get_html_field():
-    return import_string(getattr(settings,
+    return import_string(getattr(settings.settings,
         'CMSPLUGIN_SHOP_HTML_FIELD',
         'djangocms_text_ckeditor.fields.HTMLField',
     ))
 
 def get_menu(name):
-    return import_string(getattr(settings,
+    return import_string(getattr(settings.settings,
         'CMSPLUGIN_SHOP_{}_MENU'.format(name.upper()),
         'cmsplugin_shop.cms_menus.{}Menu'.format(name),
     ))
 
-def get_model(name):
-    return import_string(getattr(settings,
-        'CMSPLUGIN_SHOP_{}_MODEL'.format(name.upper()),
-        'cmsplugin_shop.models.{}'.format(name),
-    ))
+def get_mixin(name):
+    mixin = getattr(settings.settings,
+        'CMSPLUGIN_SHOP_{}_MIXIN'.format(name.upper()), None)
+    return mixin and import_string(mixin) or EmptyMixin
 
 def get_plugin(name):
-    return import_string(getattr(settings,
+    return import_string(getattr(settings.settings,
         'CMSPLUGIN_SHOP_{}_PLUGIN'.format(name.upper()),
         'cmsplugin_shop.plugins.{}Plugin'.format(name),
     ))
 
 def get_toolbar(name):
-    return import_string(getattr(settings,
+    return import_string(getattr(settings.settings,
         'CMSPLUGIN_SHOP_{}_TOOLBAR'.format(name.upper()),
         'cmsplugin_shop.cms_toolbars.{}Toolbar'.format(name),
     ))
 
 def get_view(name):
     view = import_string(getattr(
-        settings,
+        settings.settings,
         'CMSPLUGIN_SHOP_{}_VIEW'.format(name.upper()),
         'cmsplugin_shop.views.{}'.format(name),
     ))
@@ -66,44 +71,49 @@ def get_view(name):
 
 
 
-class LocaleConv:
+QUANTIZE = Decimal((0,(1,),-settings.DECIMAL_PLACES))
+
+def quantize(price):
+    return price.quantize(QUANTIZE)
+
+
+
+class LocaleConvCache(object):
     def __init__(self, languages):
         """
         This function loads localeconv for all languages during module load.
         It is necessary, because using locale.setlocale later may be dangerous
         (It is not thread-safe in most of the implementations.)
         """
+        self._conv = {}
         original_locale_name = locale.setlocale(locale.LC_ALL)
-        self.localeconv = {}
         for code, name in languages:
             locale_name = locale.locale_alias[code].split('.')[0]+'.UTF-8'
             locale.setlocale(locale.LC_ALL, str(locale_name))
-            self.localeconv[code] = locale.localeconv()
+            self._conv[code] = locale.localeconv()
         locale.setlocale(locale.LC_ALL, original_locale_name)
 
-    def __call__(self, language=None):
-        return self.localeconv[language or get_language()]
+    def getconv(self, language=None):
+        return self._conv[language or get_language()].copy()
 
-
-localeconv = LocaleConv(settings.LANGUAGES)
+localeconv_cache = LocaleConvCache(settings.settings.LANGUAGES)
 
 
 
 # This function is inspired by python's standard locale.currency().
 
-def currency(val, international=False):
+def currency(val, localeconv=None, international=False):
     """Formats val according to the currency settings for current language."""
-    conv = localeconv()
+    val = Decimal(val)
+    conv = localeconv_cache.getconv()
+    conv.update(localeconv or settings.LOCALECONV)
 
-    digits = conv[international and 'int_frac_digits' or 'frac_digits']
-
-    # check for illegal values
-    if digits == 127:
-        raise ValueError("Currency formatting is not possible using the 'C' locale.")
+    # split integer part and fraction
+    parts = str(abs(val)).split('.')
 
     # grouping
     groups = []
-    s = str(abs(int(val)))
+    s = parts[0]
     for interval in locale._grouping_intervals(conv['mon_grouping']):
         if not s:
             break
@@ -115,8 +125,8 @@ def currency(val, international=False):
     s = smart_text(conv['mon_thousands_sep']).join(groups)
 
     # display fraction for non integer values
-    if digits and not isinstance(val, int):
-        s += smart_text(conv['mon_decimal_point']) + '{{:.{}f}}'.format(digits).format(val).split('.')[1]
+    if len(parts) > 1:
+        s += smart_text(conv['mon_decimal_point']) + parts[1]
 
     # '<' and '>' are markers if the sign must be inserted between symbol and value
     s = '<' + s + '>'
