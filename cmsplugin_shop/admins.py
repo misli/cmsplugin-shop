@@ -145,6 +145,7 @@ class CartAdmin(admin.ModelAdmin):
 
 
 class OrderAdmin(admin.ModelAdmin):
+    actions         = ('send_customer_mail',)
     readonly_fields = ['slug', 'cart_link']
     list_filter     = ['state']
     list_display    = ['id', 'date', 'first_name', 'last_name', 'email',
@@ -159,6 +160,16 @@ class OrderAdmin(admin.ModelAdmin):
         )
     cart_link.short_description = _('cart')
     cart_link.allow_tags = True
+
+    def send_customer_mail(self, request, queryset):
+        for order in queryset.all():
+            try:
+                order.send_customer_mail()
+            except Exception as e:
+                self.message_user(request,
+                    _('Failed to send notification e-mail to {}').format(order.email)
+                )
+    send_customer_mail.short_description = _('Resend notification e-mail to the customer')
 
 
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-12-07 01:53+0100\n"
+"POT-Creation-Date: 2014-12-08 20:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Jakub Dorňák <jakub.dornak@misli.cz>\n"
 "Language: Czech\n"
@@ -20,9 +20,17 @@ msgstr ""
 msgid "All"
 msgstr "Všechny"
 
-#: admins.py:160 models.py:223 models.py:230 models.py:327
+#: admins.py:161 models.py:227 models.py:234 models.py:331
 msgid "cart"
 msgstr "košík"
+
+#: admins.py:170
+msgid "Failed to send notification e-mail to {}"
+msgstr "Nepodařilo se odeslat upozornění na adresu {}"
+
+#: admins.py:172
+msgid "Resend notification e-mail to the customer"
+msgstr "Znovu odeslat potvrzení objednávky zákazníkovi"
 
 #: cms_app.py:14 cms_menus.py:13
 msgid "Catalog"
@@ -70,220 +78,228 @@ msgstr ""
 msgid "I agree with terms and conditions"
 msgstr "Souhlasím s obchodními podmínkami"
 
-#: models.py:48 models.py:109 models.py:406
+#: models.py:52 models.py:113 models.py:434
 msgid "category"
 msgstr "kategorie"
 
-#: models.py:50 models.py:156 models.py:182 models.py:270 models.py:304
+#: models.py:54 models.py:160 models.py:186 models.py:274 models.py:308
 msgid "name"
 msgstr "název"
 
-#: models.py:51
+#: models.py:55
 msgid "slug"
 msgstr ""
 
-#: models.py:52
+#: models.py:56
 msgid "summary"
 msgstr "shrnutí"
 
-#: models.py:53 models.py:271 models.py:305
+#: models.py:57 models.py:275 models.py:309
 msgid "description"
 msgstr "popis"
 
-#: models.py:54
+#: models.py:58
 msgid "page title"
 msgstr "titulek stránky"
 
-#: models.py:55
+#: models.py:59
 msgid "overwrite the title (html title tag)"
 msgstr "přepíše titulek stránky (html tag title)"
 
-#: models.py:56
+#: models.py:60
 msgid "menu title"
 msgstr "titulek v menu"
 
-#: models.py:57
+#: models.py:61
 msgid "overwrite the title in the menu"
 msgstr "přepíše titulek v menu"
 
-#: models.py:58
+#: models.py:62
 msgid "meta description"
 msgstr "popis stránky (v HTML)"
 
-#: models.py:59
+#: models.py:63
 msgid "the text displayed in search engines"
 msgstr "text zobrazený ve vyhledávačích"
 
-#: models.py:60
+#: models.py:64
 msgid "active"
 msgstr "aktivní"
 
-#: models.py:90
+#: models.py:94
 msgid "tree node"
 msgstr "položka stromu"
 
-#: models.py:91
+#: models.py:95
 msgid "tree nodes"
 msgstr "položky stromu"
 
-#: models.py:110
+#: models.py:114
 msgid "categories"
 msgstr "kategorie"
 
-#: models.py:117
+#: models.py:121
 msgid "date added"
 msgstr "datum zadání"
 
-#: models.py:118
+#: models.py:122
 msgid "last modified"
 msgstr "naposled upraveno"
 
-#: models.py:119 models.py:155
+#: models.py:123 models.py:159
 msgid "multiple"
 msgstr "násobek"
 
-#: models.py:120
+#: models.py:124
 msgid "unit"
 msgstr "jednotka"
 
-#: models.py:121 models.py:134 models.py:157 models.py:175 models.py:218
-#: models.py:235 models.py:250 models.py:272 models.py:361
+#: models.py:125 models.py:138 models.py:161 models.py:179 models.py:222
+#: models.py:239 models.py:254 models.py:276 models.py:365
 msgid "price"
 msgstr "cena"
 
-#: models.py:122 models.py:236 models.py:273
+#: models.py:126 models.py:240 models.py:277
 msgid "tax rate"
 msgstr "sazba daně"
 
-#: models.py:123
+#: models.py:127
 msgid "related products"
 msgstr "příbuzné produkty"
 
-#: models.py:144 models.py:154 models.py:231 models.py:390
+#: models.py:148 models.py:158 models.py:235 models.py:418
 msgid "product"
 msgstr "produkt"
 
-#: models.py:145
+#: models.py:149
 msgid "products"
 msgstr "produkty"
 
-#: models.py:158
+#: models.py:162
 msgid "relative discount"
 msgstr "relativní sleva"
 
-#: models.py:160
+#: models.py:164
 msgid "nominal discount"
 msgstr "nominální sleva"
 
-#: models.py:191 models.py:232
+#: models.py:195 models.py:236
 msgid "product package"
 msgstr "balení"
 
-#: models.py:192
+#: models.py:196
 msgid "product packages"
 msgstr "balení"
 
-#: models.py:198
+#: models.py:202
 msgid "last updated"
 msgstr "datum poslední změny"
 
-#: models.py:224
+#: models.py:228
 msgid "carts"
 msgstr "košíky"
 
-#: models.py:234
+#: models.py:238
 msgid "quantity"
 msgstr "množství"
 
-#: models.py:246
+#: models.py:250
 msgid "unit price"
 msgstr "jednotková cena"
 
-#: models.py:262
+#: models.py:266
 msgid "cart item"
 msgstr "položka košíku"
 
-#: models.py:263
+#: models.py:267
 msgid "cart items"
 msgstr "položky košíku"
 
-#: models.py:269 models.py:303
+#: models.py:273 models.py:307
 msgid "code"
 msgstr "kód"
 
-#: models.py:274
+#: models.py:278
 msgid "ordering"
 msgstr "řazení"
 
-#: models.py:289 models.py:337
+#: models.py:293 models.py:341
 msgid "delivery method"
 msgstr "způsob doručení"
 
-#: models.py:290
+#: models.py:294
 msgid "delivery methods"
 msgstr "způsoby doručení"
 
-#: models.py:296 models.py:338
+#: models.py:300 models.py:342
 msgid "payment method"
 msgstr "způsob placení"
 
-#: models.py:297
+#: models.py:301
 msgid "payment methods"
 msgstr "způsoby placení"
 
-#: models.py:316
+#: models.py:320
 msgid "order state"
 msgstr "stav objednávky"
 
-#: models.py:317
+#: models.py:321
 msgid "order states"
 msgstr "stavy objednávek"
 
-#: models.py:328
+#: models.py:332
 msgid "state"
 msgstr "stav"
 
-#: models.py:329
+#: models.py:333
 msgid "first name"
 msgstr "křestní jméno"
 
-#: models.py:330
+#: models.py:334
 msgid "last name"
 msgstr "příjmení"
 
-#: models.py:331
+#: models.py:335
 msgid "email"
 msgstr "e-mail"
 
-#: models.py:332
+#: models.py:336
 msgid "phone"
 msgstr "telefon"
 
-#: models.py:334
+#: models.py:338
 msgid "address"
 msgstr "adresa"
 
-#: models.py:335
+#: models.py:339
 msgid "note"
 msgstr "poznámka"
 
-#: models.py:336
+#: models.py:340
 msgid "internal comment"
 msgstr "interní komentář"
 
-#: models.py:383
+#: models.py:369
+msgid "Order accepted"
+msgstr "Objednávka přijata"
+
+#: models.py:381
+msgid "New order received"
+msgstr "Nová objednávka doručena"
+
+#: models.py:411
 msgid "order"
 msgstr "objednávka"
 
-#: models.py:384
+#: models.py:412
 msgid "orders"
 msgstr "objednávky"
 
-#: models.py:391 models.py:407
+#: models.py:419 models.py:435
 msgid "template"
 msgstr "šablona"
 
-#: models.py:393 models.py:409
+#: models.py:421 models.py:437
 msgid "the template used to render plugin"
 msgstr "šablona použitá pro zobrazení položky obsahu."
 
@@ -447,19 +463,11 @@ msgstr "Přidat do košíku"
 msgid "Add and show the cart"
 msgstr "Přidat a zobrazit košík"
 
-#: views.py:90
+#: views.py:86
 msgid "Product has been added to <a href=\"{}\">shopping cart</a>"
 msgstr "Produkt byl přidán do <a href=\"{}\">nákupního košíku</a>"
 
-#: views.py:242
-msgid "Order accepted"
-msgstr "Objednávka přijata"
-
-#: views.py:247
-msgid "New order received"
-msgstr "Nová objednávka doručena"
-
-#: views.py:256
+#: views.py:239
 msgid ""
 "Your order has been accepted. The confirmation email has been sent to {}."
 msgstr "Vaše objednávka byla přijata. Potvrzovací email byl odeslán na {}."
