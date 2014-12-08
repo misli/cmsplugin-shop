@@ -5,10 +5,14 @@ from __future__ import absolute_import, division, generators, nested_scopes, pri
 import tagging
 
 from cms.models import CMSPlugin
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
+from django.template import Context
+from django.template.loader import get_template
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
@@ -359,6 +363,30 @@ class OrderBase(models.Model):
              + self.delivery_method.get_price() \
              + self.payment_method.get_price()
     get_price.short_description = _('price')
+
+    def send_customer_mail(self):
+        send_mail(
+            _('Order accepted'),
+            get_template('cmsplugin_shop/order_customer_mail.txt').render(Context({
+                'site':  Site.objects.get_current(),
+                'order': self,
+            })),
+            settings.SHOP_EMAIL,
+            [self.email],
+            **settings.SEND_MAIL_KWARGS
+        )
+
+    def send_manager_mail(self):
+        send_mail(
+            _('New order received'),
+            get_template('cmsplugin_shop/order_manager_mail.txt').render(Context({
+                'site':  Site.objects.get_current(),
+                'order': self,
+            })),
+            settings.SHOP_EMAIL,
+            map(lambda m: u'"{}" <{}>'.format(m[0], m[1]), settings.settings.MANAGERS),
+            **settings.SEND_MAIL_KWARGS
+        )
 
     def save(self, *args, **kwargs):
         if self.slug:

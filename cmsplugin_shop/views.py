@@ -6,15 +6,11 @@ from cms.views import details as cms_page
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.formtools.wizard.views import SessionWizardView
-from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
-from django.core.mail import send_mass_mail
 from django.core.urlresolvers import reverse
 from django.forms import ModelForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.template import RequestContext
-from django.template.loader import get_template
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import (
@@ -236,26 +232,9 @@ class OrderFormView(SessionWizardView):
         # save order
         order.save()
 
-        # context
-        context = RequestContext(self.request, {
-            'site':  Site.objects.get_current(),
-            'order': order,
-        })
-
-        send_mass_mail(((
-                _('Order accepted'),
-                get_template('cmsplugin_shop/order_customer_mail.txt').render(context),
-                settings.SHOP_EMAIL,
-                [order.email]
-            ), (
-                _('New order received'),
-                get_template('cmsplugin_shop/order_manager_mail.txt').render(context),
-                settings.SHOP_EMAIL,
-                map(lambda m: u'"{}" <{}>'.format(m[0], m[1]), settings.settings.MANAGERS),
-            )),
-            **settings.SEND_MAIL_KWARGS
-        )
-
+        # send notifications
+        order.send_customer_mail()
+        order.send_manager_mail()
         messages.add_message(self.request, messages.INFO, mark_safe(_(
             'Your order has been accepted. The confirmation email has been sent to {}.'
         ).format(order.email)))
