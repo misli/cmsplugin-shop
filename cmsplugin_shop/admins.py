@@ -108,7 +108,7 @@ class ProductAdmin(admin.ModelAdmin):
     form            = get_form('Product')
     ordering        = ['tree_id', 'lft']
     list_display    = ['name', 'parent', 'active', 'multiple', 'unit', 'price', 'tax_rate']
-    list_editable   = ['active', 'multiple', 'unit', 'price', 'tax_rate']
+    list_editable   = ['active', 'price', 'tax_rate']
     list_filter     = ['active', ('parent', CategoryTreeListFilter)]
     search_fields   = ['name', 'summary', 'description']
     inlines         = [ProductPackageInlineAdmin]
