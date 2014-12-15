@@ -7,7 +7,7 @@
 
 {% block content %}
 
-{% if request.user.is_staff %}
+{% if request.toolbar.use_draft %}
 <div class="cms_plugin cms_plugin_shop-node_{{ node.id }}">
 {% endif %}
 

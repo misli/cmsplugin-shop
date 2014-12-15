@@ -114,7 +114,7 @@ class CatalogView(View):
         slug_list = [slug for slug in path.split('/') if slug]
 
         # do not allow disabled nodes if user is not staff
-        if request.user.is_staff:
+        if request.toolbar.use_draft:
             active = {}
         else:
             active = {'active':True}

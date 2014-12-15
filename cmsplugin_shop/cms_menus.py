@@ -16,7 +16,7 @@ class CatalogMenu(CMSAttachMenu):
         """
         This method is used to build the menu tree.
         """
-        if request.user.is_staff:
+        if request.toolbar.use_draft:
             qs = Node.objects.order_by('tree_id', 'lft')
         else:
             qs = Node.objects.filter(active=True).order_by('tree_id', 'lft')
