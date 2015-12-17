@@ -233,9 +233,9 @@ class CartItem(models.Model):
 
     def save(self):
         if self.quantity:
-            super(CartItemBase, self).save()
+            super(CartItem, self).save()
         elif self.id:
-            super(CartItemBase, self).delete()
+            super(CartItem, self).delete()
 
 
 
@@ -360,13 +360,13 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         if self.slug:
-            super(OrderBase, self).save(*args, **kwargs)
+            super(Order, self).save(*args, **kwargs)
         else:
             tries = 10
             while True:
                 self.slug = get_rand_hash()
                 try:
-                    super(OrderBase, self).save(*args, **kwargs)
+                    super(Order, self).save(*args, **kwargs)
                     break
                 except:
                     if tries:
