@@ -104,7 +104,7 @@ class Category(Node):
         verbose_name        = _('category')
         verbose_name_plural = _('categories')
 
-#tagging.register(Category)
+tagging.register(Category)
 
 
 
@@ -135,7 +135,7 @@ class Product(Node):
         return list(self.packages.all())
 
 
-#tagging.register(Product)
+tagging.register(Product)
 
 
 
