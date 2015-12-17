@@ -16,12 +16,13 @@ from django.template.loader import get_template
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
+from filer.fields.image import FilerImageField
 from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModelBase
 
 from . import settings
 from .price import Price
-from .utils import get_rand_hash, get_html_field, get_mixin
+from .utils import get_rand_hash, get_html_field
 
 
 # allow different implementation of HTMLField
@@ -47,14 +48,16 @@ class TaxRateField(models.DecimalField):
 
 
 
+@MPTTModelBase.register
 @python_2_unicode_compatible
-class NodeBase(models.Model):
+class Node(models.Model):
     parent      = TreeForeignKey('self', verbose_name=_('category'), blank=True, null=True,
                     related_name='children', limit_choices_to={'product':None})
     name        = models.CharField(_('name'), max_length=250)
     slug        = models.SlugField(_('slug'), max_length=250, db_index=True, unique=False)
     summary     = HTMLField(_('summary'), blank=True, default='')
     description = HTMLField(_('description'), blank=True, default='')
+    photo       = FilerImageField(verbose_name='Fotka', null=True, blank=True, on_delete=models.SET_NULL)
     page_title  = models.CharField(_('page title'), max_length=250, blank=True, null=True,
                     help_text=_('overwrite the title (html title tag)'))
     menu_title  = models.CharField(_('menu title'), max_length=250, blank=True, null=True,
@@ -64,7 +67,10 @@ class NodeBase(models.Model):
     active      = models.BooleanField(default=False, verbose_name=_('active'))
 
     class Meta:
-        abstract = True
+        ordering            = ('tree_id', 'lft')
+        unique_together     = [('parent', 'slug')]
+        verbose_name        = _('tree node')
+        verbose_name_plural = _('tree nodes')
 
     def __str__(self):
         return self.name
@@ -85,15 +91,6 @@ class NodeBase(models.Model):
     def get_menu_title(self):
         return self.menu_title or self.name
 
-
-@MPTTModelBase.register
-class Node(get_mixin('node'), NodeBase):
-    class Meta:
-        ordering            = ('tree_id', 'lft')
-        unique_together     = [('parent', 'slug')]
-        verbose_name        = _('tree node')
-        verbose_name_plural = _('tree nodes')
-
     def save(self, *args, **kwargs):
         errors = self._perform_unique_checks([(Node, ('parent', 'slug'))])
         if errors:
@@ -101,23 +98,17 @@ class Node(get_mixin('node'), NodeBase):
         super(Node, self).save(*args, **kwargs)
 
 
-
-class CategoryBase(Node):
-    class Meta:
-        abstract            = True
-
-
-class Category(get_mixin('category'), CategoryBase):
+class Category(Node):
     class Meta:
         ordering            = ('tree_id', 'lft')
         verbose_name        = _('category')
         verbose_name_plural = _('categories')
 
-tagging.register(Category)
+#tagging.register(Category)
 
 
 
-class ProductBase(Node):
+class Product(Node):
     date_added      = models.DateTimeField(_('date added'), auto_now_add=True)
     last_modified   = models.DateTimeField(_('last modified'), auto_now=True)
     multiple        = models.IntegerField(_('multiple'), default=1, null=False)
@@ -127,7 +118,9 @@ class ProductBase(Node):
     related         = models.ManyToManyField('self', _('related products'), blank=True)
 
     class Meta:
-        abstract    = True
+        ordering            = ('tree_id', 'lft')
+        verbose_name        = _('product')
+        verbose_name_plural = _('products')
 
     @property
     def unit_price(self):
@@ -142,18 +135,12 @@ class ProductBase(Node):
         return list(self.packages.all())
 
 
-class Product(get_mixin('product'), ProductBase):
-    class Meta:
-        ordering            = ('tree_id', 'lft')
-        verbose_name        = _('product')
-        verbose_name_plural = _('products')
-
-tagging.register(Product)
+#tagging.register(Product)
 
 
 
 @python_2_unicode_compatible
-class ProductPackageBase(models.Model):
+class ProductPackage(models.Model):
     product             = models.ForeignKey(Product,
                             verbose_name=_('product'), related_name='packages')
     multiple            = models.IntegerField(_('multiple'))
@@ -164,7 +151,9 @@ class ProductPackageBase(models.Model):
     nominal_discount    = PriceField(_('nominal discount'), blank=True, null=True)
 
     class Meta:
-        abstract    = True
+        ordering            = ('multiple',)
+        verbose_name        = _('product package')
+        verbose_name_plural = _('product packages')
 
     def get_price(self):
         if self.price:
@@ -189,20 +178,13 @@ class ProductPackageBase(models.Model):
         return '{}, {}'.format(self.get_name(), self.get_price())
 
 
-class ProductPackage(get_mixin('product_package'), ProductPackageBase):
-    class Meta:
-        ordering            = ('multiple',)
-        verbose_name        = _('product package')
-        verbose_name_plural = _('product packages')
-
-
-
 @python_2_unicode_compatible
-class CartBase(models.Model):
+class Cart(models.Model):
     last_updated = models.DateTimeField(_('last updated'), auto_now=True)
 
     class Meta:
-        abstract            = True
+        verbose_name        = _('cart')
+        verbose_name_plural = _('carts')
 
     def __str__(self):
         return ', '.join(map(smart_text, self.all_items))
@@ -222,15 +204,9 @@ class CartBase(models.Model):
     get_price.short_description = _('price')
 
 
-class Cart(get_mixin('cart'), CartBase):
-    class Meta:
-        verbose_name        = _('cart')
-        verbose_name_plural = _('carts')
-
-
 
 @python_2_unicode_compatible
-class CartItemBase(models.Model):
+class CartItem(models.Model):
     cart        = models.ForeignKey(Cart,           verbose_name=_('cart'),             related_name='items')
     product     = models.ForeignKey(Product,        verbose_name=_('product'),          related_name='+')
     package     = models.ForeignKey(ProductPackage, verbose_name=_('product package'),  related_name='+',
@@ -240,7 +216,9 @@ class CartItemBase(models.Model):
     tax_rate    = TaxRateField(_('tax rate'))
 
     class Meta:
-        abstract            = True
+        unique_together     = [('cart', 'product', 'package')]
+        verbose_name        = _('cart item')
+        verbose_name_plural = _('cart items')
 
     def __str__(self):
         return '{}x {}{}'.format(self.quantity, self.product, self.package and ' {}'.format(self.package) or '')
@@ -260,16 +238,9 @@ class CartItemBase(models.Model):
             super(CartItemBase, self).delete()
 
 
-class CartItem(get_mixin('cart_item'), CartItemBase):
-    class Meta:
-        unique_together     = [('cart', 'product', 'package')]
-        verbose_name        = _('cart item')
-        verbose_name_plural = _('cart items')
-
-
 
 @python_2_unicode_compatible
-class MethodBase(models.Model):
+class Method(models.Model):
     code        = models.SlugField(_('code'))
     name        = models.CharField(_('name'), max_length=150)
     description = HTMLField(_('description'), blank=True, default='')
@@ -287,14 +258,15 @@ class MethodBase(models.Model):
         return Price(self.price, self.tax_rate)
 
 
-class DeliveryMethod(get_mixin('delivery_method'), MethodBase):
+class DeliveryMethod(Method):
     class Meta:
         ordering            = ('ordering', 'name')
         verbose_name        = _('delivery method')
         verbose_name_plural = _('delivery methods')
 
 
-class PaymentMethod(get_mixin('payment_method'), MethodBase):
+
+class PaymentMethod(Method):
     class Meta:
         ordering            = ('ordering', 'name')
         verbose_name        = _('payment method')
@@ -303,27 +275,23 @@ class PaymentMethod(get_mixin('payment_method'), MethodBase):
 
 
 @python_2_unicode_compatible
-class OrderStateBase(models.Model):
+class OrderState(models.Model):
     code        = models.SlugField(_('code'))
     name        = models.CharField(_('name'), max_length=150)
     description = HTMLField(_('description'), blank=True, default='')
 
     class Meta:
-        abstract            = True
+        verbose_name        = _('order state')
+        verbose_name_plural = _('order states')
 
     def __str__(self):
         return self.name
 
 
-class OrderState(get_mixin('order_state'), OrderStateBase):
-    class Meta:
-        verbose_name        = _('order state')
-        verbose_name_plural = _('order states')
-
 
 
 @python_2_unicode_compatible
-class OrderBase(models.Model):
+class Order(models.Model):
     user            = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True,
                         on_delete=models.SET_NULL)
     slug            = models.SlugField(editable=False)
@@ -342,7 +310,9 @@ class OrderBase(models.Model):
     payment_method  = models.ForeignKey(PaymentMethod, verbose_name=_('payment method'))
 
     class Meta:
-        abstract            = True
+        ordering            = ('-date',)
+        verbose_name        = _('order')
+        verbose_name_plural = _('orders')
 
     def __str__(self):
         return '{} {} {}'.format(self.date, self.first_name, self.last_name)
@@ -403,13 +373,6 @@ class OrderBase(models.Model):
                         tries -= 1
                     else:
                         raise
-
-
-class Order(get_mixin('order'), OrderBase):
-    class Meta:
-        ordering            = ('-date',)
-        verbose_name        = _('order')
-        verbose_name_plural = _('orders')
 
 
 

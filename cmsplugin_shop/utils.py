@@ -44,11 +44,6 @@ def get_menu(name):
         'cmsplugin_shop.cms_menus.{}Menu'.format(name),
     ))
 
-def get_mixin(name):
-    mixin = getattr(settings.settings,
-        'CMSPLUGIN_SHOP_{}_MIXIN'.format(name.upper()), None)
-    return mixin and import_string(mixin) or EmptyMixin
-
 def get_plugin(name):
     return import_string(getattr(settings.settings,
         'CMSPLUGIN_SHOP_{}_PLUGIN'.format(name.upper()),
