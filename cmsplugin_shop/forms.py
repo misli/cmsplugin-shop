@@ -35,12 +35,14 @@ class TaggingFormMixin(forms.ModelForm):
 class CategoryForm(TaggingFormMixin):
     class Meta:
         model   = models.Category
+        exclude = ()
 
 
 
 class ProductForm(TaggingFormMixin):
     class Meta:
         model   = models.Product
+        exclude = ()
 
 
 
