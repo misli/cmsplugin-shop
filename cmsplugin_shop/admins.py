@@ -151,6 +151,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_display    = ['id', 'date', 'first_name', 'last_name', 'email',
                        'phone', 'address', 'delivery_method', 'payment_method',
                        'state', 'get_price', 'cart_link']
+    list_editable   = ['state']
     search_fields   = ['first_name', 'last_name', 'email', 'phone', 'address']
 
     def cart_link(self, order):
