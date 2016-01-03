@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, generators, nested_scopes, print_function, unicode_literals, with_statement
 
 import datetime
+from django.utils import timezone
 from django.utils.functional import cached_property
 
 from . import settings
@@ -14,7 +15,7 @@ def cart(self):
     except (KeyError, Cart.DoesNotExist):
         # delete expired carts
         Cart.objects.filter(
-            last_updated__lt = datetime.date.today() - datetime.timedelta(settings.CART_EXPIRY_DAYS),
+            last_updated__lt = timezone.now() - datetime.timedelta(settings.CART_EXPIRY_DAYS),
             order=None
         ).delete()
         # create new one
