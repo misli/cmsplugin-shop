@@ -5,7 +5,6 @@ import cStringIO
 from cms.views import details as cms_page
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.formtools.wizard.views import SessionWizardView
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.forms import ModelForm
@@ -17,6 +16,7 @@ from django.views.generic import (
     CreateView, DetailView, FormView, ListView,
     TemplateView, UpdateView, View,
 )
+from formtools.wizard.views import SessionWizardView
 from os.path import basename
 from xhtml2pdf import pisa
 
