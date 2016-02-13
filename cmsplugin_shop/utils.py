@@ -38,12 +38,6 @@ def get_html_field():
         'djangocms_text_ckeditor.fields.HTMLField',
     ))
 
-def get_menu(name):
-    return import_string(getattr(settings.settings,
-        'CMSPLUGIN_SHOP_{}_MENU'.format(name.upper()),
-        'cmsplugin_shop.cms_menus.{}Menu'.format(name),
-    ))
-
 def get_plugin(name):
     return import_string(getattr(settings.settings,
         'CMSPLUGIN_SHOP_{}_PLUGIN'.format(name.upper()),
