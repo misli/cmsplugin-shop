@@ -116,6 +116,7 @@ class Product(Node):
     price           = PriceField(_('price'))
     tax_rate        = TaxRateField(_('tax rate'))
     related         = models.ManyToManyField('self', _('related products'), blank=True)
+    voucher_exclude = models.BooleanField(_('excluded from vouchers'), default=False)
 
     class Meta:
         ordering            = ('tree_id', 'lft')
@@ -146,7 +147,7 @@ class ProductPackage(models.Model):
     multiple            = models.IntegerField(_('multiple'))
     name                = models.CharField(_('name'), max_length=250, blank=True, null=True)
     price               = PriceField(_('price'), blank=True, null=True)
-    relative_discount   = models.DecimalField(_('relative discount'), default=1,
+    relative_discount   = models.DecimalField(_('relative discount'),
                             decimal_places=4, max_digits=8, blank=True, null=True)
     nominal_discount    = PriceField(_('nominal discount'), blank=True, null=True)
 
@@ -249,7 +250,7 @@ class Method(models.Model):
     ordering    = models.PositiveIntegerField(_('ordering'), default=1)
 
     class Meta:
-        abstract    = True
+        abstract = True
 
     def __str__(self):
         return '{}, {}'.format(self.name, self.get_price())
@@ -271,6 +272,44 @@ class PaymentMethod(Method):
         ordering            = ('ordering', 'name')
         verbose_name        = _('payment method')
         verbose_name_plural = _('payment methods')
+
+
+
+@python_2_unicode_compatible
+class Voucher(models.Model):
+    name        = models.CharField(_('name'), max_length=250)
+    slug        = models.SlugField(_('slug'), max_length=250, db_index=True, unique=False)
+    summary     = HTMLField(_('summary'), blank=True, default='')
+    photo       = FilerImageField(verbose_name='Fotka', null=True, blank=True, on_delete=models.SET_NULL)
+    valid_from  = models.DateTimeField(_('valid_from'))
+    valid_to    = models.DateTimeField(_('valid_to'))
+    relative_discount   = models.DecimalField(_('relative discount'),
+                            decimal_places=4, max_digits=8, blank=True, null=True)
+    nominal_discount    = PriceField(_('nominal discount'), blank=True, null=True)
+    categories  = models.ManyToManyField(Category, _('categories'), blank=True)
+    delivery_methods = models.ManyToManyField(DeliveryMethod, verbose_name=_('delivery methods'), blank=True)
+    payment_methods  = models.ManyToManyField(PaymentMethod, verbose_name=_('payment methods'), blank=True)
+    one_time    = models.BooleanField(_('one time'), default=False)
+    min_price   = PriceField(_('minimal price'), blank=True, null=True)
+
+    class Meta:
+        verbose_name        = _('voucher')
+        verbose_name_plural = _('vouchers')
+
+    def __str__(self):
+        return self.name
+
+    @cached_property
+    def all_categories(self):
+        return list(self.categories.all())
+
+    @cached_property
+    def all_delivery_methods(self):
+        return list(self.delivery_methods.all())
+
+    @cached_property
+    def all_payment_methods(self):
+        return list(self.payment_methods.all())
 
 
 
@@ -308,6 +347,8 @@ class Order(models.Model):
     comment         = models.TextField(_('internal comment'), blank=True)
     delivery_method = models.ForeignKey(DeliveryMethod, verbose_name=_('delivery method'))
     payment_method  = models.ForeignKey(PaymentMethod, verbose_name=_('payment method'))
+    voucher         = models.ForeignKey(Voucher, verbose_name=_('voucher'), related_name='orders',
+                        blank=True, null=True)
 
     class Meta:
         ordering            = ('-date',)
@@ -328,11 +369,69 @@ class Order(models.Model):
            and reverse('MyOrders:detail', kwargs={'pk':self.pk}) \
             or reverse('Order:detail', kwargs={'slug':self.slug})
 
-    def get_price(self):
-        return self.cart.get_price() \
-             + self.delivery_method.get_price() \
-             + self.payment_method.get_price()
-    get_price.short_description = _('price')
+    @cached_property
+    def cart_price(self):
+        return self.cart.get_price()
+
+    @cached_property
+    def delivery_method_price(self):
+        return self.delivery_method.get_price()
+
+    @cached_property
+    def payment_method_price(self):
+        return self.payment_method.get_price()
+
+    @cached_property
+    def voucher_price(self):
+        # check voucher
+        if not self.voucher:
+            return Price(0)
+
+        # check categories
+        if self.voucher.all_categories:
+            items = [
+                item for item in self.cart.all_items
+                if (
+                    not item.product.voucher_exclude and
+                    any(item.product.is_descendant_of(cat) for cat in self.voucher.all_categories)
+                )
+            ]
+            if not items:
+                return Price(0)
+        else:
+            items = [
+                item for item in self.cart.all_items
+                if not item.product.voucher_exclude
+            ]
+
+        # check minimal price
+        if self.voucher.min_price:
+            items_price = sum(item.get_price() for item in items)
+            if items_price < Price(self.voucher.min_price):
+                return Price(0)
+
+        # check delivery method
+        if self.voucher.all_delivery_methods and self.delivery_method not in delivery_methods:
+            return Price(0)
+
+        # check payment method
+        if self.voucher.all_payment_methods and self.payment_method not in payment_methods:
+            return Price(0)
+
+        # return nominal discount
+        if self.voucher.nominal_discount:
+            return Price(-self.voucher.nominal_discount)
+
+        # return relative discount
+        return sum(item.get_price() * (self.voucher.relative_discount / -100) for item in items)
+
+    @cached_property
+    def price(self):
+        return self.cart_price \
+             + self.delivery_method_price \
+             +  self.payment_method_price \
+             + self.voucher_price
+    price.short_description = _('price')
 
     def send_customer_mail(self):
         send_mail(

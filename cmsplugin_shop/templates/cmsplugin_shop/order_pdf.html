@@ -37,21 +37,31 @@
                 <td>
                     {{ object.delivery_method.name }}
                 </td>
-                <td class="number">{{ object.delivery_method.get_price }}</td>
+                <td class="number">{{ object.delivery_method_price }}</td>
                 <td class="number"></td>
-                <td class="number">{{ object.delivery_method.get_price }}</td>
+                <td class="number">{{ object.delivery_method_price }}</td>
             </tr>
             <tr>
                 <td>
                     {{ object.payment_method.name }}
                 </td>
-                <td class="number">{{ object.payment_method.get_price }}</td>
+                <td class="number">{{ object.payment_method_price }}</td>
                 <td class="number"></td>
-                <td class="number">{{ object.payment_method.get_price }}</td>
+                <td class="number">{{ object.payment_method_price }}</td>
             </tr>
+            {% if object.voucher %}
+            <tr>
+                <td>
+                    {{ object.voucher.name }}
+                </td>
+                <td class="number"></td>
+                <td class="number"></td>
+                <td class="number">{{ object.voucher_price }}</td>
+            </tr>
+            {% endif %}
             <tr>
                 <th colspan="3">{% trans 'Total' %}</th>
-                <th class="number">{{ object.get_price }}</th>
+                <th class="number">{{ object.price }}</th>
             </tr>
         </table>
     </body>

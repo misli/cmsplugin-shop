@@ -8,8 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-12-08 20:21+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"POT-Creation-Date: 2017-07-23 19:00+0200\n"
 "Last-Translator: Jakub Dorňák <jakub.dornak@misli.cz>\n"
 "Language: Czech\n"
 "MIME-Version: 1.0\n"
@@ -20,19 +19,19 @@ msgstr ""
 msgid "All"
 msgstr "Všechny"
 
-#: admins.py:161 models.py:227 models.py:234 models.py:331
+#: admins.py:169 models.py:187 models.py:211 models.py:338
 msgid "cart"
 msgstr "košík"
 
-#: admins.py:170
+#: admins.py:178
 msgid "Failed to send notification e-mail to {}"
 msgstr "Nepodařilo se odeslat upozornění na adresu {}"
 
-#: admins.py:172
+#: admins.py:180
 msgid "Resend notification e-mail to the customer"
 msgstr "Znovu odeslat potvrzení objednávky zákazníkovi"
 
-#: cms_app.py:14 cms_menus.py:13
+#: cms_app.py:14 menu.py:15
 msgid "Catalog"
 msgstr "Katalog"
 
@@ -65,7 +64,7 @@ msgstr "Přidat produkt"
 msgid "Add category"
 msgstr "Přidat kategorii"
 
-#: forms.py:19
+#: forms.py:20
 msgid ""
 "Enter space separated list of single word tags or comma separated list of "
 "tags containing spaces. Use doublequotes to enter name containing comma."
@@ -74,232 +73,265 @@ msgstr ""
 "oddělených čárkou. Pro vložení tagů obsahujících čárku je možné použít "
 "uvozovky."
 
-#: forms.py:77
+#: forms.py:98
+msgid "Voucher code"
+msgstr "Kód slevy"
+
+#: forms.py:99
 msgid "I agree with terms and conditions"
 msgstr "Souhlasím s obchodními podmínkami"
 
-#: models.py:52 models.py:113 models.py:434
+#: models.py:54 models.py:104 models.py:496
 msgid "category"
 msgstr "kategorie"
 
-#: models.py:54 models.py:160 models.py:186 models.py:274 models.py:308
+#: models.py:56 models.py:148 models.py:176 models.py:246 models.py:280
+#: models.py:319
 msgid "name"
 msgstr "název"
 
-#: models.py:55
+#: models.py:57 models.py:281
 msgid "slug"
 msgstr ""
 
-#: models.py:56
+#: models.py:58 models.py:282
 msgid "summary"
 msgstr "shrnutí"
 
-#: models.py:57 models.py:275 models.py:309
+#: models.py:59 models.py:247 models.py:320
 msgid "description"
 msgstr "popis"
 
-#: models.py:58
+#: models.py:61
 msgid "page title"
 msgstr "titulek stránky"
 
-#: models.py:59
+#: models.py:62
 msgid "overwrite the title (html title tag)"
 msgstr "přepíše titulek stránky (html tag title)"
 
-#: models.py:60
+#: models.py:63
 msgid "menu title"
 msgstr "titulek v menu"
 
-#: models.py:61
+#: models.py:64
 msgid "overwrite the title in the menu"
 msgstr "přepíše titulek v menu"
 
-#: models.py:62
+#: models.py:65
 msgid "meta description"
 msgstr "popis stránky (v HTML)"
 
-#: models.py:63
+#: models.py:66
 msgid "the text displayed in search engines"
 msgstr "text zobrazený ve vyhledávačích"
 
-#: models.py:64
+#: models.py:67
 msgid "active"
 msgstr "aktivní"
 
-#: models.py:94
+#: models.py:72
 msgid "tree node"
 msgstr "položka stromu"
 
-#: models.py:95
+#: models.py:73
 msgid "tree nodes"
 msgstr "položky stromu"
 
-#: models.py:114
+#: models.py:105 models.py:289
 msgid "categories"
 msgstr "kategorie"
 
-#: models.py:121
+#: models.py:112
 msgid "date added"
 msgstr "datum zadání"
 
-#: models.py:122
+#: models.py:113
 msgid "last modified"
 msgstr "naposled upraveno"
 
-#: models.py:123 models.py:159
+#: models.py:114 models.py:147
 msgid "multiple"
 msgstr "násobek"
 
-#: models.py:124
+#: models.py:115
 msgid "unit"
 msgstr "jednotka"
 
-#: models.py:125 models.py:138 models.py:161 models.py:179 models.py:222
-#: models.py:239 models.py:254 models.py:276 models.py:365
+#: models.py:116 models.py:132 models.py:149 models.py:169 models.py:205
+#: models.py:216 models.py:233 models.py:248 models.py:434
 msgid "price"
 msgstr "cena"
 
-#: models.py:126 models.py:240 models.py:277
+#: models.py:117 models.py:217 models.py:249
 msgid "tax rate"
 msgstr "sazba daně"
 
-#: models.py:127
+#: models.py:118
 msgid "related products"
 msgstr "příbuzné produkty"
 
-#: models.py:148 models.py:158 models.py:235 models.py:418
+#: models.py:119
+msgid "excluded from vouchers"
+msgstr "vyloučeno ze slev"
+
+#: models.py:123 models.py:146 models.py:212 models.py:480
 msgid "product"
 msgstr "produkt"
 
-#: models.py:149
+#: models.py:124
 msgid "products"
 msgstr "produkty"
 
-#: models.py:162
+#: models.py:150 models.py:286
 msgid "relative discount"
 msgstr "relativní sleva"
 
-#: models.py:164
+#: models.py:152 models.py:288
 msgid "nominal discount"
 msgstr "nominální sleva"
 
-#: models.py:195 models.py:236
+#: models.py:156 models.py:213
 msgid "product package"
 msgstr "balení"
 
-#: models.py:196
+#: models.py:157
 msgid "product packages"
 msgstr "balení"
 
-#: models.py:202
+#: models.py:184
 msgid "last updated"
 msgstr "datum poslední změny"
 
-#: models.py:228
+#: models.py:188
 msgid "carts"
 msgstr "košíky"
 
-#: models.py:238
+#: models.py:215
 msgid "quantity"
 msgstr "množství"
 
-#: models.py:250
-msgid "unit price"
-msgstr "jednotková cena"
-
-#: models.py:266
+#: models.py:221
 msgid "cart item"
 msgstr "položka košíku"
 
-#: models.py:267
+#: models.py:222
 msgid "cart items"
 msgstr "položky košíku"
 
-#: models.py:273 models.py:307
+#: models.py:229
+msgid "unit price"
+msgstr "jednotková cena"
+
+#: models.py:245 models.py:318
 msgid "code"
 msgstr "kód"
 
-#: models.py:278
+#: models.py:250
 msgid "ordering"
 msgstr "řazení"
 
-#: models.py:293 models.py:341
+#: models.py:265 models.py:348
 msgid "delivery method"
 msgstr "způsob doručení"
 
-#: models.py:294
+#: models.py:266 models.py:290
 msgid "delivery methods"
 msgstr "způsoby doručení"
 
-#: models.py:300 models.py:342
+#: models.py:273 models.py:349
 msgid "payment method"
 msgstr "způsob placení"
 
-#: models.py:301
+#: models.py:274 models.py:291
 msgid "payment methods"
 msgstr "způsoby placení"
 
-#: models.py:320
+#: models.py:284
+msgid "valid_from"
+msgstr "platný od"
+
+#: models.py:285
+msgid "valid_to"
+msgstr "platný do"
+
+#: models.py:292
+msgid "one time"
+msgstr "jednorázový"
+
+#: models.py:293
+msgid "minimal price"
+msgstr "minimální cena"
+
+#: models.py:296 models.py:350
+msgid "voucher"
+msgstr "slevový poukaz"
+
+#: models.py:297
+msgid "vouchers"
+msgstr "slevové poukazy"
+
+#: models.py:323
 msgid "order state"
 msgstr "stav objednávky"
 
-#: models.py:321
+#: models.py:324
 msgid "order states"
 msgstr "stavy objednávek"
 
-#: models.py:332
+#: models.py:339
 msgid "state"
 msgstr "stav"
 
-#: models.py:333
+#: models.py:340
 msgid "first name"
 msgstr "křestní jméno"
 
-#: models.py:334
+#: models.py:341
 msgid "last name"
 msgstr "příjmení"
 
-#: models.py:335
+#: models.py:342
 msgid "email"
 msgstr "e-mail"
 
-#: models.py:336
+#: models.py:343
 msgid "phone"
 msgstr "telefon"
 
-#: models.py:338
+#: models.py:345
 msgid "address"
 msgstr "adresa"
 
-#: models.py:339
+#: models.py:346
 msgid "note"
 msgstr "poznámka"
 
-#: models.py:340
+#: models.py:347
 msgid "internal comment"
 msgstr "interní komentář"
 
-#: models.py:369
-msgid "Order accepted"
-msgstr "Objednávka přijata"
-
-#: models.py:381
-msgid "New order received"
-msgstr "Nová objednávka doručena"
-
-#: models.py:411
+#: models.py:355
 msgid "order"
 msgstr "objednávka"
 
-#: models.py:412
+#: models.py:356
 msgid "orders"
 msgstr "objednávky"
 
-#: models.py:419 models.py:435
+#: models.py:438
+msgid "Order accepted"
+msgstr "Objednávka přijata"
+
+#: models.py:450
+msgid "New order received"
+msgstr "Nová objednávka doručena"
+
+#: models.py:481 models.py:497
 msgid "template"
 msgstr "šablona"
 
-#: models.py:421 models.py:437
+#: models.py:483 models.py:499
 msgid "the template used to render plugin"
 msgstr "šablona použitá pro zobrazení položky obsahu."
 
@@ -348,8 +380,8 @@ msgid "Delete"
 msgstr "Smazat"
 
 #: templates/cmsplugin_shop/cart.html:34
-#: templates/cmsplugin_shop/order_cart.html:37
-#: templates/cmsplugin_shop/order_pdf.html:53
+#: templates/cmsplugin_shop/order_cart.html:43
+#: templates/cmsplugin_shop/order_pdf.html:63
 msgid "Total"
 msgstr "Celkem"
 

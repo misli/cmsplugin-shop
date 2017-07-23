@@ -10,6 +10,7 @@ admin.site.register(models.Product,         get_admin('Product'))
 admin.site.register(models.Cart,            get_admin('Cart'))
 admin.site.register(models.DeliveryMethod,  get_admin('DeliveryMethod'))
 admin.site.register(models.PaymentMethod,   get_admin('PaymentMethod'))
+admin.site.register(models.Voucher,         get_admin('Voucher'))
 admin.site.register(models.OrderState,      get_admin('OrderState'))
 admin.site.register(models.Order,           get_admin('Order'))
 

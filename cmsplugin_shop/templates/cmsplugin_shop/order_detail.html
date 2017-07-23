@@ -9,7 +9,7 @@
 
 <table class="table order-status">
     <tr><th>{% trans 'State of the order' %}</td>   <td>{{ order.state }}</td></tr>
-    <tr><th>{% trans 'Order total' %}</th>          <td>{{ order.get_price }}</td></tr>
+    <tr><th>{% trans 'Order total' %}</th>          <td>{{ order.price }}</td></tr>
     <tr><th>{% trans 'Date of receipt' %}</td>      <td>{{ order.date }}</td></tr>
 </table>
 

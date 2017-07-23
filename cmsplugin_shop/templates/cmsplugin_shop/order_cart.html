@@ -27,15 +27,21 @@
     {% if order %}
     <tr>
         <td colspan="3">{{ order.delivery_method.name }}</td>
-        <td class="number">{{ order.delivery_method.get_price }}</td>
+        <td class="number">{{ order.delivery_method_price }}</td>
     </tr>
     <tr>
         <td colspan="3">{{ order.payment_method.name }}</td>
-        <td class="number">{{ order.payment_method.get_price }}</td>
+        <td class="number">{{ order.payment_method_price }}</td>
     </tr>
+    {% if order.voucher %}
+    <tr>
+        <td colspan="3">{{ order.voucher.name }}</td>
+        <td class="number">{{ order.voucher_price }}</td>
+    </tr>
+    {% endif %}
     <tr>
         <th colspan="3">{% trans 'Total' %}</th>
-        <th class="number">{{ order.get_price }}</th>
+        <th class="number">{{ order.price }}</th>
     </tr>
     {% endif %}
 </table>

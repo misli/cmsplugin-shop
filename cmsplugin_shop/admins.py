@@ -144,13 +144,20 @@ class CartAdmin(admin.ModelAdmin):
 
 
 
+class VoucherAdmin(admin.ModelAdmin):
+    filter_horizontal   = ['categories', 'delivery_methods', 'payment_methods']
+    ordering        = ['-valid_from']
+    prepopulated_fields = {'slug': ('name',)}
+
+
+
 class OrderAdmin(admin.ModelAdmin):
     actions         = ('send_customer_mail',)
     readonly_fields = ['slug', 'cart_link']
     list_filter     = ['state']
     list_display    = ['id', 'date', 'first_name', 'last_name', 'email',
                        'phone', 'address', 'delivery_method', 'payment_method',
-                       'state', 'get_price', 'cart_link']
+                       'state', 'price', 'cart_link']
     list_editable   = ['state']
     search_fields   = ['first_name', 'last_name', 'email', 'phone', 'address']
 

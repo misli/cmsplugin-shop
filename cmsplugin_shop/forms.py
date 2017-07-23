@@ -6,6 +6,7 @@ from datetime import date
 from django import forms
 from django.forms.models import inlineformset_factory
 from django.utils.safestring import mark_safe
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from tagging.forms import TagField
 from tagging.utils import edit_string_for_tags
@@ -75,12 +76,31 @@ CartForm = inlineformset_factory(
 
 
 
+class VoucherField(forms.ModelChoiceField):
+    widget = forms.CharField.widget
+
+    def __init__(self, *args, **kwargs):
+        queryset = models.Voucher.objects.filter(valid_from__lte=now(), valid_to__gt=now())
+        super(VoucherField, self).__init__(queryset, *args, **kwargs)
+
+    def clean(self, slug):
+        try:
+            voucher = self.queryset.get(slug=slug)
+        except models.Voucher.DoesNotExist:
+            return None
+        if voucher.one_time and voucher.orders.count():
+            return None
+        return voucher
+
+
+
 class OrderForm(forms.ModelForm):
+    voucher = VoucherField(label=_('Voucher code'))
     agreement = forms.BooleanField(label=_('I agree with terms and conditions'))
 
     class Meta:
         model   = models.Order
-        exclude = ['user', 'state', 'comment']
+        exclude = ['user', 'state', 'comment', 'voucher']
 
     def __init__(self, *args, **kwargs):
         super(OrderForm, self).__init__(*args, **kwargs)
